@@ -58,13 +58,13 @@ var (
 		},
 		SchemaProps: spec.SchemaProps{
 			Title:       "BuildInfo",
-			Description: "Serialized object describing the build information used for creating this VTAPI instance.",
+			Description: "Serialized object describing the build information used for creating this application instance.",
 			Type:        []string{"object"},
 			Format:      "",
 			Properties: spec.SchemaProperties{
 				"version": spec.Schema{
 					SchemaProps: spec.SchemaProps{
-						Description: "The specific version of VTAPI.",
+						Description: "The specific version of application.",
 						Title:       "version",
 						Type:        []string{"string"},
 						Format:      "",
@@ -72,7 +72,7 @@ var (
 				},
 				"commit": spec.Schema{
 					SchemaProps: spec.SchemaProps{
-						Description: "The git commit from which this VTAPI instance is derived.",
+						Description: "The git commit from which this application instance is derived.",
 						Title:       "commit",
 						Type:        []string{"string"},
 						Format:      "",
@@ -80,7 +80,7 @@ var (
 				},
 				"buildTime": spec.Schema{
 					SchemaProps: spec.SchemaProps{
-						Description: "The time at which this instance of VTAPI was compiled.",
+						Description: "The time at which this instance of application was compiled.",
 						Title:       "buildTime",
 						Type:        []string{"string"},
 						Format:      "",

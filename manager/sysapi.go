@@ -22,7 +22,7 @@ type ConfigInfo struct {
 var (
 	sysAPIListenPort *ConfigKey = &ConfigKey{
 		Name:        "sysAPIListenPort",
-		Description: "Specify the listening port of the sysAPI. Should be an unsigned integer between 1 and 65535, but should be above 1024 preferably to avoid needing CAP_SYS_ADMIN or root privileges for the VTAPI process.",
+		Description: "Specify the listening port of the sysAPI. Should be an unsigned integer between 1 and 65535, but should be above 1024 preferably to avoid needing CAP_SYS_ADMIN or root privileges for the app process.",
 		TypeOf:      Uint16,
 		DefaultVal:  8081,
 		IsSecret:    false,
@@ -121,13 +121,13 @@ func (m *APIManager) initSysAPI() {
 	// The primary spec object for sysAPI. Can have other stuff registered to it through RegisterSysAPIHandler().
 	spec := &spec.Swagger{
 		SwaggerProps: spec.SwaggerProps{
-			Consumes: []string{"application/json", "application/xml", "application/yaml", "application/VTAPI+Protobuf"},
-			Produces: []string{"application/json", "application/xml", "application/yaml", "application/VTAPI+Protobuf"},
+			Consumes: []string{"application/json", "application/xml", "application/yaml", "application/API+Protobuf"},
+			Produces: []string{"application/json", "application/xml", "application/yaml", "application/API+Protobuf"},
 			Swagger:  "2.0",
 			Info: &spec.Info{
 				InfoProps: spec.InfoProps{
-					Description: "VTAPI Systems API.",
-					Title:       "VTAPI SysAPI",
+					Description: m.registrar.AppName + " Systems API.",
+					Title:       m.registrar.AppName + " SysAPI",
 					Version:     "0.0.4",
 				},
 			},
@@ -148,7 +148,7 @@ func (m *APIManager) initSysAPI() {
 							Get: spec.NewOperation("getSwagger").
 								WithTags("sys").
 								RespondsWith(200, spec.NewResponse().
-									WithDescription("Returns the current swagger specification file for sysAPI on the current VTAPI instance being queried. This will always be returned in JSON format.")),
+									WithDescription("Returns the current swagger specification file for sysAPI on the current app instance being queried. This will always be returned in JSON format.")),
 						},
 					},
 					"/readyz": {
@@ -156,7 +156,7 @@ func (m *APIManager) initSysAPI() {
 							Get: spec.NewOperation("getReady").
 								WithTags("sys").
 								RespondsWith(200, spec.NewResponse().
-									WithDescription("Returns the readiness of the VTAPI process, acts as a overarching readiness healthcheck for the system.").
+									WithDescription("Returns the readiness of the app process, acts as a overarching readiness healthcheck for the system.").
 									WithSchema(spec.RefSchema("#/definitions/OKResponse"))),
 						},
 					},
@@ -165,7 +165,7 @@ func (m *APIManager) initSysAPI() {
 							Get: spec.NewOperation("getLive").
 								WithTags("sys").
 								RespondsWith(200, spec.NewResponse().
-									WithDescription("Returns the liveness of the VTAPI process, acts as a overarching liveness healthcheck for the system.").
+									WithDescription("Returns the liveness of the app process, acts as a overarching liveness healthcheck for the system.").
 									WithSchema(spec.RefSchema("#/definitions/OKResponse"))),
 						},
 					},
@@ -174,9 +174,9 @@ func (m *APIManager) initSysAPI() {
 							Get: spec.NewOperation("getConfiguration").
 								WithProduces("application/json", "application/yaml", "application/xml").
 								WithTags("sys").
-								WithDescription("Returns the current configuration parameters of the VTAPI process.").
+								WithDescription("Returns the current configuration parameters of the app process.").
 								RespondsWith(200, spec.NewResponse().
-									WithDescription("Returns the current configuration parameters of the VTAPI process.").
+									WithDescription("Returns the current configuration parameters of the app process.").
 									WithSchema(spec.ArrayProperty(spec.RefSchema("#/definitions/ConfigKeyValue")))),
 						},
 					},
@@ -185,9 +185,9 @@ func (m *APIManager) initSysAPI() {
 							Get: spec.NewOperation("getSecrets").
 								WithProduces("application/json", "application/yaml", "application/xml").
 								WithTags("sys").
-								WithDescription("Returns the current secret keys configured with the VTAPI process. Please note the actual values will be hidden.").
+								WithDescription("Returns the current secret keys configured with the app process. Please note the actual values will be hidden.").
 								RespondsWith(200, spec.NewResponse().
-									WithDescription("Returns the current secret keys configured with the VTAPI process. Please note the actual values will be hidden.").
+									WithDescription("Returns the current secret keys configured with the app process. Please note the actual values will be hidden.").
 									WithSchema(spec.ArrayProperty(spec.RefSchema("#/definitions/ConfigKeyValue")))),
 						},
 					},
@@ -195,9 +195,9 @@ func (m *APIManager) initSysAPI() {
 						PathItemProps: spec.PathItemProps{
 							Get: spec.NewOperation("getStatus").
 								WithTags("sys").
-								WithDescription("Return the status of all subsystems within the running VTAPI instance.").
+								WithDescription("Return the status of all subsystems within the running app instance.").
 								RespondsWith(200, spec.NewResponse().
-									WithDescription("Return the status of all subsystems within the running VTAPI instance.").
+									WithDescription("Return the status of all subsystems within the running app instance.").
 									WithSchema(spec.ArrayProperty(spec.RefSchema("#/definitions/SubsystemStatus")))),
 						},
 					},
@@ -334,11 +334,11 @@ func (m *APIManager) initSysAPI() {
 
 	m.router.GET("/buildinfo", func(ctx *fasthttp.RequestCtx) {
 		bi := &BuildInfo{
-			Version:   pkg.Version,
-			Commit:    pkg.Commit,
-			BuildTime: pkg.BuildTime,
-			Os:        pkg.Os,
-			Arch:      pkg.Arch,
+			// Version:   pkg.Version,
+			// Commit:    pkg.Commit,
+			// BuildTime: pkg.BuildTime,
+			// Os:        pkg.Os,
+			// Arch:      pkg.Arch,
 		}
 
 		serialization.MarshalBodyByAcceptHeader(ctx, bi)

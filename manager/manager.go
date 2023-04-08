@@ -35,7 +35,7 @@ func New() *APIManager {
 }
 
 // Register subsystem should be called in an init function by all subsystems
-// that want to be registered and run by the VTAPI at runtime.
+// that want to be registered and run by the application at runtime.
 // Please make sure that your subsystem defers WaitGroups provided to it
 // IMMEDIATELY. If you do not do this, then the process will deadlock on startup
 // and you will have a broken process, and then everyone has a bad day.
@@ -127,7 +127,7 @@ func (m *APIManager) initConfigs() {
 	}
 
 	// Configure config file initialization first.
-	m.config.AddConfigPath("/etc/vtapi")
+	m.config.AddConfigPath("/etc/" + m.registrar.AppName)
 	m.config.AddConfigPath("test")
 	m.config.SetConfigName("config")
 
@@ -135,7 +135,7 @@ func (m *APIManager) initConfigs() {
 		klog.Errorf("ALERT: unable to read in configuration file! Relying on system defaults. Error: %v", e)
 	}
 
-	m.secrets.AddConfigPath("/etc/vtapi/secrets")
+	m.secrets.AddConfigPath("/etc/" + m.registrar.AppName + "/secrets")
 	m.secrets.AddConfigPath("test")
 	m.secrets.SetConfigName("secrets")
 

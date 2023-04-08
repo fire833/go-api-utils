@@ -29,7 +29,7 @@ func TestOKResponseHandler(t *testing.T) {
 		// Explicitly test protobuf marshalling.
 		for i := 0; i < 500; i++ {
 			ctx := &fasthttp.RequestCtx{}
-			ctx.Request.Header.Set("Accept", "application/VTAPI+Protobuf")
+			ctx.Request.Header.Set("Accept", "application/API+Protobuf")
 
 			OKResponseHandler(ctx, 200, fake.FakeStringCeil(256))
 			if ctx.Response.StatusCode() < 200 || ctx.Response.StatusCode() > 299 {
@@ -110,7 +110,7 @@ func TestBadRequestResponseHandler(t *testing.T) {
 		// Explicitly test protobuf marshalling.
 		for i := 0; i < 500; i++ {
 			ctx := &fasthttp.RequestCtx{}
-			ctx.Request.Header.Set("Accept", "application/VTAPI+Protobuf")
+			ctx.Request.Header.Set("Accept", "application/API+Protobuf")
 
 			BadRequestResponseHandler(ctx, fake.FakeStringCeil(256))
 			if ctx.Response.StatusCode() != 400 {
@@ -191,7 +191,7 @@ func TestNotFoundResponseHandler(t *testing.T) {
 		// Explicitly test protobuf marshalling.
 		for i := 0; i < 500; i++ {
 			ctx := &fasthttp.RequestCtx{}
-			ctx.Request.Header.Set("Accept", "application/VTAPI+Protobuf")
+			ctx.Request.Header.Set("Accept", "application/API+Protobuf")
 
 			NotFoundResponseHandler(ctx, fake.FakeStringCeil(256))
 			if ctx.Response.StatusCode() != 404 {
@@ -272,7 +272,7 @@ func TestUnauthorizedResponseHandler(t *testing.T) {
 		// Explicitly test protobuf marshalling.
 		for i := 0; i < 500; i++ {
 			ctx := &fasthttp.RequestCtx{}
-			ctx.Request.Header.Set("Accept", "application/VTAPI+Protobuf")
+			ctx.Request.Header.Set("Accept", "application/API+Protobuf")
 
 			UnauthorizedResponseHandler(ctx, fake.FakeStringCeil(256))
 			if ctx.Response.StatusCode() != 401 {
@@ -353,7 +353,7 @@ func TestForbiddenResponseHandler(t *testing.T) {
 		// Explicitly test protobuf marshalling.
 		for i := 0; i < 500; i++ {
 			ctx := &fasthttp.RequestCtx{}
-			ctx.Request.Header.Set("Accept", "application/VTAPI+Protobuf")
+			ctx.Request.Header.Set("Accept", "application/API+Protobuf")
 
 			ForbiddenResponseHandler(ctx, fake.FakeStringCeil(256))
 			if ctx.Response.StatusCode() != 403 {
@@ -434,7 +434,7 @@ func TestInternalErrorResponseHandler(t *testing.T) {
 		// Explicitly test protobuf marshalling.
 		for i := 0; i < 500; i++ {
 			ctx := &fasthttp.RequestCtx{}
-			ctx.Request.Header.Set("Accept", "application/VTAPI+Protobuf")
+			ctx.Request.Header.Set("Accept", "application/API+Protobuf")
 
 			InternalErrorResponseHandler(ctx, fake.FakeStringCeil(256))
 			if ctx.Response.StatusCode() != 500 {
@@ -515,7 +515,7 @@ func TestNotAcceptableResponseHandler(t *testing.T) {
 		// Explicitly test protobuf marshalling.
 		for i := 0; i < 500; i++ {
 			ctx := &fasthttp.RequestCtx{}
-			ctx.Request.Header.Set("Accept", "application/VTAPI+Protobuf")
+			ctx.Request.Header.Set("Accept", "application/API+Protobuf")
 
 			NotAcceptableResponseHandler(ctx, fake.FakeStringCeil(256))
 			if ctx.Response.StatusCode() != 406 {
@@ -596,7 +596,7 @@ func TestMethodNotAllowedResponseHandler(t *testing.T) {
 		// Explicitly test protobuf marshalling.
 		for i := 0; i < 500; i++ {
 			ctx := &fasthttp.RequestCtx{}
-			ctx.Request.Header.Set("Accept", "application/VTAPI+Protobuf")
+			ctx.Request.Header.Set("Accept", "application/API+Protobuf")
 
 			MethodNotAllowedResponseHandler(ctx, fake.FakeStringCeil(256))
 			if ctx.Response.StatusCode() != 405 {
@@ -677,7 +677,7 @@ func TestNotImplementedResponseHandler(t *testing.T) {
 		// Explicitly test protobuf marshalling.
 		for i := 0; i < 500; i++ {
 			ctx := &fasthttp.RequestCtx{}
-			ctx.Request.Header.Set("Accept", "application/VTAPI+Protobuf")
+			ctx.Request.Header.Set("Accept", "application/API+Protobuf")
 
 			NotImplementedResponseHandler(ctx, fake.FakeStringCeil(256))
 			if ctx.Response.StatusCode() != 501 {

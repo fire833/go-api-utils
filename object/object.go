@@ -1,4 +1,4 @@
-package vtobject
+package object
 
 import "google.golang.org/protobuf/reflect/protoreflect"
 

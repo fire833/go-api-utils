@@ -3,11 +3,11 @@
 package manager
 
 // AddItem appends a new SubsystemStatus object to the existing list of items within the existing SubsystemStatusList.
-func (vt *SubsystemStatusList) AddItem(item *SubsystemStatus) {
-	vt.Items = append(vt.Items, item)
+func (a *SubsystemStatusList) AddItem(item *SubsystemStatus) {
+	a.Items = append(a.Items, item)
 }
 
 // AddItem appends a new BuildInfo object to the existing list of items within the existing BuildInfoList.
-func (vt *BuildInfoList) AddItem(item *BuildInfo) {
-	vt.Items = append(vt.Items, item)
+func (a *BuildInfoList) AddItem(item *BuildInfo) {
+	a.Items = append(a.Items, item)
 }

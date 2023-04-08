@@ -22,7 +22,7 @@ const (
 )
 
 // SubsystemStatus is a standard structure to represent the current state
-// of a subsystem within VTAPI. This status can be advertised over the SysAPI
+// of a subsystem within. This status can be advertised over the SysAPI
 // for systems engineers and admins to get real-time insight into subsystem
 // performance and stability.
 type SubsystemStatus struct {

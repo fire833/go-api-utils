@@ -13,15 +13,15 @@ import (
 
 // APIManager is the primary object that provides abstraction between process orchestration and startup and
 // code that actually performs useful business logic. The easiest way to think about this object is it being
-// PID 1 for VTAPI, but WITHIN the actual VTAPI process. Some of the functionality that APIManager implements
+// PID 1 for the application, but WITHIN the actual app process. Some of the functionality that APIManager implements
 // includes:
 //
 // - Registering signal handlers and then "forwarding" those signals to invidual subsystems of the process to handle.
 //
-// - Deserializing configuration from multiple locations within the environment (primarily /etc/vtapi) and providing APIs
+// - Deserializing configuration from multiple locations within the environment (primarily /etc/<app name>) and providing APIs
 //   for subsystems to easily access those configuration parameters for their successful use. Some examples of this are
 //   the database user/password that is managed by APIManager and accessed by the SQLManager subsystem for connecting to
-//   the backing database. Another example could be configuring concurrency on the primary VTServer. The VTServer subsystem
+//   the backing database. Another example could be configuring concurrency on the primary HTTP server. The server subsystem
 //   retrieves the integer value through APIManager internal APIs, and is able to go on its merry way with serving up requests.
 //
 // - Managing subsystems, and sending signals to subsystems whenever a "config reload" signal is sent to the process, or a
@@ -30,14 +30,16 @@ import (
 //   For more information on the callbacks to manage subsystems that are invoked by the APIManager, please refer to the Subsystem
 //   interface in types.go.
 //
-// - Exposing a systems API for introspection into the inner workings of the VTAPI process. This includes exposing things such
+// - Exposing a systems API for introspection into the inner workings of the app process. This includes exposing things such
 //   as the swagger docs for the sysAPI itself, exposing all prometheus metrics, exposing readiness/liveness endpoints for the process
 //   as a whole as well as individual subsystems, subsystem statistics, and much more. The idea long term is for this API to also
-//   be used as a management interface for some kind of controller, that will automatically scale and configure VTAPI instances
+//   be used as a management interface for some kind of controller, that will automatically scale and configure app instances
 //   as loads shifts for different API products.
 //
 type APIManager struct {
 	m sync.RWMutex
+
+	registrar *SystemRegistrar
 
 	// Count is the current count of subsystems that are registered with the manager.
 	// Should not be edited after init.
@@ -65,8 +67,8 @@ type APIManager struct {
 	// to it. This registry will then be collected when called upon by the SysAPI within APIManager.
 	registry *prometheus.Registry
 
-	// server contains the server data for the VTAPI sysAPI. This API is for operators to get detailed
-	// insight into the performance, status, and overall health of the process and subsystems of VTAPI.
+	// server contains the server data for the app sysAPI. This API is for operators to get detailed
+	// insight into the performance, status, and overall health of the process and subsystems of app.
 	// The long term goal is develop a
 	server *fasthttp.Server
 

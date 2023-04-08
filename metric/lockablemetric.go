@@ -3,7 +3,7 @@ package metric
 import "sync"
 
 // Lockable metrics wraps a float64 metric value with a mutex for
-// allowing key-level locking for a metric within a VTObjectManager.
+// allowing key-level locking for a metric within a ObjectManager.
 type LockableMetric struct {
 	m sync.Mutex
 
