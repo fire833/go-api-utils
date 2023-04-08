@@ -1,0 +1,56 @@
+
+syntax = "proto3";
+
+package manager;
+
+import "google/protobuf/any.proto";
+// import "google/protobuf/struct.proto";
+
+option go_package = ";manager";
+
+// SubsystemStatus is a standard structure to represent the current state
+// of a subsystem within VTAPI. This status can be advertised over the SysAPI
+// for systems engineers and admins to get real-time insight into subsystem
+// performance and stability.
+message SubsystemStatus {
+
+    // Specify the name of the subsystem again for reference.
+    string name = 1;
+
+    // Specify whether this subsystem has been successfully
+    // initialized. Should return true if Initialize() has been
+    // called and returned by APIManager without error.
+    bool isInitialized = 2;
+
+    // Specify whether this subsystem has been successfully
+    // shutdown. Should return true if Shutdown() has been
+    // called and returned by APIManager.
+    bool isShutdown = 3;
+
+    // Subsystems can return arbitrary metadata (preferably
+    // something human-readable) for specific performance benchmarking
+    // and analysis on a per-subsystem basis.
+    google.protobuf.Any meta = 4;
+}
+
+// BuildInfo is an object that contains information about VTAPI binaries themselves.
+// This includes the semantic verison of the binary, the commit hash the binary
+// was built from, the build time, etc. This object can be served over SysAPI for
+// network-based diagnostics.
+message BuildInfo {
+
+    // The specific version of VTAPI.
+    string version = 1;
+
+    // The git commit from which this VTAPI instance is derived.
+    string commit = 2;
+
+    // The time at which this instance of VTAPI was compiled.
+    string buildTime = 3;
+
+    // The OS this binary is meant for.
+    string os = 4;
+
+    // The platform this binary is meant for.
+    string arch = 5;
+}

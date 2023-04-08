@@ -1,0 +1,70 @@
+
+syntax = "proto3";
+
+package apitypes;
+
+// import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+
+// option (gogoproto.populate_all) = true;
+
+option go_package = "../serialization";
+
+// GenericErrorResponse
+//
+// GenericErrorResponse is a generic error object that is returned whenever an API
+// endpoint returns an unexpected error.
+//
+// This model will be sent with any invalid request, but will be
+// tailored to the specific error.
+//
+// swagger:model GenericErrorResponse
+message GenericErrorResponse {
+    // The http error string for this error.
+    //
+    // required: true
+    // @gotags: yaml:"error" xml:"error" bson:"error"
+    string error = 1;
+    // A more verbose description of this error, sometimes with a subsystem reference.
+    //
+    // required: true
+    // @gotags: yaml:"description" xml:"description" bson:"description"
+    string description = 2;
+    // The integer http status code corresponding to error string.
+    //
+    // required: true
+    // @gotags: yaml:"code" xml:"code" bson:"code"
+    uint32 code = 3;
+    // The timestamp of this response being returned.
+    //
+    // required: true
+    // @gotags: yaml:"timestamp" xml:"timestamp" bson:"timestamp"
+    google.protobuf.Timestamp timestamp = 4;
+}
+
+// OKResponse
+//
+// OKResponse is a generic response returned whenever an operation was successful.
+//
+// swagger:model OKResponse
+message OKResponse {
+    // Human-readable message for the successful response.
+    //
+    // required: true
+    // @gotags: yaml:"message" xml:"message" bson:"message"
+    string message = 1;
+    // The timestamp of this response being returned.
+    //
+    // required: true
+    // @gotags: yaml:"timestamp" xml:"timestamp" bson:"timestamp"
+    google.protobuf.Timestamp timestamp = 2;
+    // The integer http status code corresponding to the response.
+    //
+    // required: true
+    // @gotags: yaml:"code" xml:"code" bson:"code"
+    uint32 code = 3;
+}
+
+message VTTime {
+
+}
