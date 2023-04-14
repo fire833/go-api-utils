@@ -85,7 +85,7 @@ type APIManager struct {
 	sigHandle chan os.Signal
 }
 
-// Subsystem is a component of VTAPI that is bootstrapped by the manager upon process startup.
+// Subsystem is a component of app that is bootstrapped by the manager upon process startup.
 // Each subsystem needs to be registered with an init() method to the APIManager in order for
 // its callbacks to be invoked at the proper times on process startup. For an example of a bare-bones
 // NOP subsystem, please refer to the manager.DefaultSubsystem structure in defaultsubsystem.go.

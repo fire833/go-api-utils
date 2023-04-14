@@ -106,7 +106,7 @@ func (x *SubsystemStatus) GetMeta() *anypb.Any {
 	return nil
 }
 
-// BuildInfo is an object that contains information about VTAPI binaries themselves.
+// BuildInfo is an object that contains information about app binaries themselves.
 // This includes the semantic verison of the binary, the commit hash the binary
 // was built from, the build time, etc. This object can be served over SysAPI for
 // network-based diagnostics.
@@ -115,11 +115,11 @@ type BuildInfo struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	// The specific version of VTAPI.
+	// The specific version of app.
 	Version string `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
-	// The git commit from which this VTAPI instance is derived.
+	// The git commit from which this app instance is derived.
 	Commit string `protobuf:"bytes,2,opt,name=commit,proto3" json:"commit,omitempty"`
-	// The time at which this instance of VTAPI was compiled.
+	// The time at which this instance of app was compiled.
 	BuildTime string `protobuf:"bytes,3,opt,name=buildTime,proto3" json:"buildTime,omitempty"`
 	// The OS this binary is meant for.
 	Os string `protobuf:"bytes,4,opt,name=os,proto3" json:"os,omitempty"`

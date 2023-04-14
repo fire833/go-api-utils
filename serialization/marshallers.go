@@ -40,7 +40,7 @@ func UnmarshalBodyByContentHeader(ctx *fasthttp.RequestCtx, data object.Object) 
 				return nil
 			}
 		}
-	case "application/VTAPI+Protobuf":
+	case "application/API+Protobuf":
 		{
 			if e := proto.Unmarshal(ctx.Request.Body(), data); e != nil {
 				return e
@@ -96,7 +96,7 @@ func MarshalBodyByAcceptHeader(ctx *fasthttp.RequestCtx, in object.Object) error
 				return nil
 			}
 		}
-	case "application/VTAPI+Protobuf":
+	case "application/API+Protobuf":
 		{
 			if data, e := proto.Marshal(in); e != nil {
 				InternalErrorResponseHandler(ctx, e.Error())

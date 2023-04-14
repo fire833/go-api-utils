@@ -25,8 +25,8 @@ type SystemRegistrar struct {
 	Systems []Subsystem
 
 	// Registration is the data access that you want to start with
-	// this application. For example, in the case of VTAPI, you will
-	// probably wish to register the vtapidata.VTAPI object here, and
+	// this application. For example, in the case of app, you will
+	// probably wish to register the appdata.app object here, and
 	// this will be passed to subsystems for use.
 	Registration AppRegistration
 }

@@ -1,0 +1,13 @@
+
+syntax = "proto3";
+
+package otel;
+
+// import "google/protobuf/struct.proto";
+
+option go_package = ";otel";
+
+message SamplerStatus {
+    string name = 1;
+    bool enabled = 2;
+}
