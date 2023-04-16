@@ -23,7 +23,7 @@ func (m *APIManager) SyncStartProcess() {
 	<-m.shutdown
 }
 
-func (m *APIManager) initializeSubsystems(reg AppRegistration) {
+func (m *APIManager) initializeSubsystems(reg *SystemRegistrar) {
 	wg := new(sync.WaitGroup)
 	wg.Add(int(m.count))
 

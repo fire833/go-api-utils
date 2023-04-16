@@ -30,7 +30,7 @@ func TestAPIManager_initializeSubsystems(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields fields
-		reg    AppRegistration
+		reg    *SystemRegistrar
 	}{
 		// TODO: Add test cases.
 	}

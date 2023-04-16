@@ -161,7 +161,7 @@ func (m *APIManager) Initialize(registrar *SystemRegistrar) {
 	// Set up the sysAPI and all its handlers.
 	m.initSysAPI()
 
-	m.initializeSubsystems(registrar.Registration)
+	m.initializeSubsystems(registrar)
 
 	m.setGlobals()
 }

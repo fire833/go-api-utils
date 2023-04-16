@@ -33,7 +33,7 @@ func TestDefaultSubsystem_Initialize(t *testing.T) {
 	tests := []struct {
 		name    string
 		wg      *sync.WaitGroup
-		reg     AppRegistration
+		reg     *SystemRegistrar
 		wantErr bool
 	}{
 		{

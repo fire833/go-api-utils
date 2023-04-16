@@ -26,7 +26,7 @@ func (d *DefaultSubsystem) Configs() *[]*ConfigKey {
 
 func (d *DefaultSubsystem) SetGlobal() {}
 
-func (d *DefaultSubsystem) Initialize(wg *sync.WaitGroup, reg AppRegistration) error {
+func (d *DefaultSubsystem) Initialize(wg *sync.WaitGroup, reg *SystemRegistrar) error {
 	defer wg.Done()
 	d.IsInitialized = true
 	return nil

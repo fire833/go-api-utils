@@ -112,7 +112,7 @@ type Subsystem interface {
 	// the subsystem with backoff until an error is no longer returned.
 	//
 	// The waitgroup should be immediately deferred in the called function.
-	Initialize(wg *sync.WaitGroup, reg AppRegistration) error
+	Initialize(wg *sync.WaitGroup, reg *SystemRegistrar) error
 
 	// If a subsystem needs to be synchronously called by the manager (IE you will call a method
 	// that should never return), wrap that method here and it will be held open by the manager
