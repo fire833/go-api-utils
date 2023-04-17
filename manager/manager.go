@@ -155,6 +155,8 @@ func (m *APIManager) Initialize(registrar *SystemRegistrar) {
 	// Tell the runtime to forward signals from the OS to this channel for downstream processing.
 	signal.Notify(m.sigHandle)
 
+	m.registrar = registrar
+
 	// read in configuration and secrets before booting further, or at least attempt to.
 	m.initConfigs()
 
