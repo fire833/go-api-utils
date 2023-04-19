@@ -47,6 +47,14 @@ type APIServer struct {
 	requestCount prometheus.Counter
 }
 
+func New() *APIServer {
+	return &APIServer{
+		server:     nil,
+		router:     nil,
+		servername: "unknown",
+	}
+}
+
 func (s *APIServer) Name() string { return "api" }
 
 func (s *APIServer) Initialize(wg *sync.WaitGroup, reg *manager.SystemRegistrar) error {
