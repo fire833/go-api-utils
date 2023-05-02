@@ -18,7 +18,7 @@
 
 package gormsql
 
-import "github.com/fire833/go-api-utils/manager"
+import manager "github.com/fire833/go-api-utils/mgr"
 
 var (
 	gormSQLBackend *manager.ConfigKey = manager.NewConfigKey(

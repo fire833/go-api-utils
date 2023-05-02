@@ -18,12 +18,16 @@
 
 syntax = "proto3";
 
-package otel;
+package manager;
 
-option go_package = "../otel";
+option go_package = "../manager";
 
-import "otel.proto";
+import "manager.proto";
 
-message SamplerStatusList {
-	repeated SamplerStatus items = 1;
+message SubsystemStatusList {
+	repeated SubsystemStatus items = 1;
+}
+
+message BuildInfoList {
+	repeated BuildInfo items = 1;
 }

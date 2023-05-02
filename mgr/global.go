@@ -16,14 +16,11 @@
 *	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-syntax = "proto3";
+package mgr
 
-package otel;
+//go:generate protoc --go_out=. --go_opt=Mmanager.proto=../manager manager.proto
+//go:generate protoc --go_out=. --go_opt=Mmanager.proto=../manager manager_list.proto
 
-option go_package = "../otel";
-
-import "otel.proto";
-
-message SamplerStatusList {
-	repeated SamplerStatus items = 1;
-}
+var (
+	Manager *APIManager = New()
+)

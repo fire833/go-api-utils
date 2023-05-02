@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/fasthttp/router"
-	"github.com/fire833/go-api-utils/manager"
+	manager "github.com/fire833/go-api-utils/mgr"
 	"github.com/fire833/go-api-utils/serialization"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/valyala/fasthttp"

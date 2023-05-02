@@ -21,7 +21,7 @@ package gormsql
 import (
 	"sync"
 
-	"github.com/fire833/go-api-utils/manager"
+	manager "github.com/fire833/go-api-utils/mgr"
 	"github.com/prometheus/client_golang/prometheus"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"

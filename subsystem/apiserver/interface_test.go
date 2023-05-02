@@ -16,14 +16,36 @@
 *	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-syntax = "proto3";
+package apiserver
 
-package otel;
+import (
+	"strconv"
+	"testing"
 
-option go_package = "../otel";
+	"github.com/fasthttp/router"
+	"github.com/valyala/fasthttp"
+)
 
-import "otel.proto";
+func BenchmarkRouter1(b *testing.B) {
+	router := router.New()
 
-message SamplerStatusList {
-	repeated SamplerStatus items = 1;
+	for i := 0; i < 250; i++ {
+		router.GET("/"+strconv.Itoa(i), func(ctx *fasthttp.RequestCtx) {})
+	}
+
+	router.GET("/150/hsjdfhs/438yuhfsdf/24y8hfjsdhf/ghaw7rt2734sd/foo/bar/1234", func(ctx *fasthttp.RequestCtx) {})
+
+	req := fasthttp.AcquireRequest()
+	uri := fasthttp.AcquireURI()
+	uri.SetPath("/150/hsjdfhs/438yuhfsdf/24y8hfjsdhf/ghaw7rt2734sd/foo/bar/1234")
+	req.SetURI(uri)
+
+	ctx := &fasthttp.RequestCtx{
+		Request: *req,
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		router.Handler(ctx)
+	}
 }

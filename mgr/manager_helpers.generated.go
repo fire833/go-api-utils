@@ -16,14 +16,14 @@
 *	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-syntax = "proto3";
+package mgr
 
-package otel;
+// AddItem appends a new SubsystemStatus object to the existing list of items within the existing SubsystemStatusList.
+func (a *SubsystemStatusList) AddItem(item *SubsystemStatus) {
+	a.Items = append(a.Items, item)
+}
 
-option go_package = "../otel";
-
-import "otel.proto";
-
-message SamplerStatusList {
-	repeated SamplerStatus items = 1;
+// AddItem appends a new BuildInfo object to the existing list of items within the existing BuildInfoList.
+func (a *BuildInfoList) AddItem(item *BuildInfo) {
+	a.Items = append(a.Items, item)
 }
