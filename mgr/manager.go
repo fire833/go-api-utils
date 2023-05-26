@@ -41,10 +41,10 @@ func New() *APIManager {
 		count:     0,
 		systems:   make(map[string]Subsystem),
 		shutdown:  make(chan uint8),
-		keys:      []*ConfigKey{},
 		config:    viper.New(),
 		secrets:   viper.New(),
 		registry:  prometheus.NewRegistry(),
+		vault:     nil,
 		router:    router.New(),
 		spec:      nil, // Start with null, the spec should be generated on Initialize().
 		server:    nil, // Start with null, the server should be started on Initialize().

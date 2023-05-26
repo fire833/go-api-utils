@@ -38,10 +38,6 @@ type DefaultSubsystem struct {
 // Default naming
 func (d *DefaultSubsystem) Name() string { return "default" }
 
-func (d *DefaultSubsystem) Configs() *[]*ConfigKey {
-	return &[]*ConfigKey{}
-}
-
 func (d *DefaultSubsystem) SetGlobal() {}
 
 func (d *DefaultSubsystem) Initialize(wg *sync.WaitGroup, reg *SystemRegistrar) error {

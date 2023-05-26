@@ -123,8 +123,8 @@ func AddResponseBoilerplate(resp *spec.Operation) *spec.Operation {
 	resp.Parameters = append(resp.Parameters, *authParam, *acceptParam, *contentTypeParam)
 
 	return resp.
-		WithConsumes("application/json", "application/xml", "application/yaml", "application/app+Protobuf").
-		WithProduces("application/json", "application/xml", "application/yaml", "application/app+Protobuf").
+		WithConsumes("application/json", "application/xml", "application/yaml", "application/protobuf").
+		WithProduces("application/json", "application/xml", "application/yaml", "application/protobuf").
 		RespondsWith(400, spec.ResponseRef("#/responses/IncorrectResponse")).
 		RespondsWith(401, spec.ResponseRef("#/responses/UnauthorizedResponse")).
 		RespondsWith(404, spec.ResponseRef("#/responses/NotFoundResponse")).

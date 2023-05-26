@@ -24,6 +24,7 @@ import (
 
 	"github.com/fasthttp/router"
 	"github.com/go-openapi/spec"
+	vault "github.com/hashicorp/vault/api"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	"github.com/valyala/fasthttp"
@@ -65,12 +66,7 @@ type APIManager struct {
 	// Map of all subsystem names mapped to their backing implementations.
 	systems map[string]Subsystem
 
-	// Set of keys that are to be managed by APIManager, and will be called upon by one
-	// or more subsystems that will depend on that value.
-	keys []*ConfigKey
-
-	// Set of Keys that are secret, same as keys field.
-	secretKeys []*ConfigKey
+	vault *vault.Client
 
 	// Config contains non-secret key/value data for configuring the process.
 	config *viper.Viper
@@ -114,11 +110,6 @@ type Subsystem interface {
 
 	// Return the name of this subsystem for referencing.
 	Name() string
-
-	// Return the set of config keys that should be tracked/registered with the APImanager.
-	// This should return a copy of the reference slice of config keys, since they will need to be
-	// called by the registering subsystem at initialization/runtime.
-	Configs() *[]*ConfigKey
 
 	// Optionally, can set a global variable to point to the initialized subsystem object.
 	// This can be useful for global functions to point to a central state location, and then check and

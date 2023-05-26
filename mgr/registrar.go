@@ -77,32 +77,3 @@ type AppRegistration interface {
 	// this application. This allows for admins to toggle which spans are collected at runtime.
 	RegisterOTELTraces() []string
 }
-
-// GetConfigKeys will retrieve all the configkeys for this registrar.
-func (r *SystemRegistrar) GetConfigKeys() []*ConfigKey {
-	keys := []*ConfigKey{}
-
-	for _, sys := range r.Systems {
-		for _, key := range *sys.Configs() {
-			if !key.IsSecret {
-				keys = append(keys, key)
-			}
-		}
-	}
-
-	return keys
-}
-
-func (r *SystemRegistrar) GetSecretConfigKeys() []*ConfigKey {
-	keys := []*ConfigKey{}
-
-	for _, sys := range r.Systems {
-		for _, key := range *sys.Configs() {
-			if key.IsSecret {
-				keys = append(keys, key)
-			}
-		}
-	}
-
-	return keys
-}
