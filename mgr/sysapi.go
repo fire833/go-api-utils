@@ -358,5 +358,5 @@ func (m *APIManager) initSysAPI() {
 }
 
 func (m *APIManager) startSysAPI() {
-	m.server.ListenAndServe(":" + strconv.Itoa(int(sysAPIListenPort.RetriveValue().(uint16))))
+	m.server.ListenAndServe(":" + strconv.Itoa(int(sysAPIListenPort.GetUint16())))
 }

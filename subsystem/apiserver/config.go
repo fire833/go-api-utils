@@ -21,79 +21,63 @@ package apiserver
 import manager "github.com/fire833/go-api-utils/mgr"
 
 var (
-	apiServerListenPort *manager.ConfigValue[uint16] = manager.NewConfigValue[uint16](
+	apiServerListenPort *manager.ConfigValue = manager.NewConfigValue(
 		"apiServerListenPort",
 		"Specify the listening port for this instance of APIServer. Should be an unsigned integer between 1 and 65535, but should be above 1024 preferably to avoid needing CAP_SYS_ADMIN or root privileges for the apiAPI process.",
 		uint16(8080),
 	)
 
-	apiServerListenIp *manager.ConfigKey = &manager.ConfigKey{
-		Name:        "apiServerListenIp",
-		Description: "Specify the listening IP for apiServer to bind to. Defaults to all available interfaces with 0.0.0.0.",
-		TypeOf:      manager.String,
-		DefaultVal:  "0.0.0.0",
-		IsSecret:    false,
-	}
+	apiServerListenIp *manager.ConfigValue = manager.NewConfigValue(
+		"apiServerListenIp",
+		"Specify the listening IP for apiServer to bind to. Defaults to all available interfaces with 0.0.0.0.",
+		"0.0.0.0",
+	)
 
-	apiServerConcurrency *manager.ConfigValue[int] = manager.NewConfigValue[int]()
-		Name:        "apiServerConcurrency",
-		Description: "Specify the amount of concurrent connections to be allowed to the apiServer webserver concurrently.",
-		IsSecret:    false,
-		DefaultVal:  1000,
-		TypeOf:      manager.Int,
-	}
+	apiServerConcurrency *manager.ConfigValue = manager.NewConfigValue(
+		"apiServerConcurrency",
+		"Specify the amount of concurrent connections to be allowed to the apiServer webserver concurrently.",
+		uint(1000),
+	)
 
-	apiServerReadBufferSize *manager.ConfigKey = &manager.ConfigKey{
-		Name:        "apiServerReadBufferSize",
-		Description: "Specify per-connection buffer size for requests reading. This also limits the maximum header size. Increase this buffer if your clients send multi-KB RequestURIs and/or multi-KB headers (for example, BIG cookies).",
-		TypeOf:      manager.Int,
-		DefaultVal:  4096,
-		IsSecret:    false,
-	}
+	apiServerReadBufferSize *manager.ConfigValue = manager.NewConfigValue(
+		"apiServerReadBufferSize",
+		"Specify per-connection buffer size for requests reading. This also limits the maximum header size. Increase this buffer if your clients send multi-KB RequestURIs and/or multi-KB headers (for example, BIG cookies).",
+		uint(4096),
+	)
 
-	apiServerWriteBufferSize *manager.ConfigKey = &manager.ConfigKey{
-		Name:        "apiServerWriteBufferSize",
-		Description: "Per-connection buffer size for responses writing.",
-		TypeOf:      manager.Int,
-		DefaultVal:  4096,
-		IsSecret:    false,
-	}
+	apiServerWriteBufferSize *manager.ConfigValue = manager.NewConfigValue(
+		"apiServerWriteBufferSize",
+		"Per-connection buffer size for responses writing.",
+		uint(4096),
+	)
 
-	apiServerReadTimeout *manager.ConfigKey = &manager.ConfigKey{
-		Name:        "apiServerReadTimeout",
-		Description: "ReadTimeout is the amount of time (in seconds) allowed to read the full request including body. The connection's read deadline is reset when the connection opens, or for keep-alive connections after the first byte has been read.",
-		TypeOf:      manager.Int,
-		DefaultVal:  120,
-		IsSecret:    false,
-	}
+	apiServerReadTimeout *manager.ConfigValue = manager.NewConfigValue(
+		"apiServerReadTimeout",
+		"ReadTimeout is the amount of time (in seconds) allowed to read the full request including body. The connection's read deadline is reset when the connection opens, or for keep-alive connections after the first byte has been read.",
+		uint(120),
+	)
 
-	apiServerWriteTimeout *manager.ConfigKey = &manager.ConfigKey{
-		Name:        "apiServerWriteTimeout",
-		Description: "WriteTimeout is the maximum duration (in seconds) before timing out writes of the response. It is reset after the request handler has returned.",
-		TypeOf:      manager.Int,
-		DefaultVal:  120,
-		IsSecret:    false,
-	}
+	apiServerWriteTimeout *manager.ConfigValue = manager.NewConfigValue(
+		"apiServerWriteTimeout",
+		"WriteTimeout is the maximum duration (in seconds) before timing out writes of the response. It is reset after the request handler has returned.",
+		uint(120),
+	)
 
-	apiServerIdleTimeout *manager.ConfigKey = &manager.ConfigKey{
-		Name:        "apiServerIdleTimeout",
-		Description: "IdleTimeout is the maximum amount of time (in seconds) to wait for the next request when keep-alive is enabled.",
-		TypeOf:      manager.Int,
-		DefaultVal:  120,
-		IsSecret:    false,
-	}
+	apiServerIdleTimeout *manager.ConfigValue = manager.NewConfigValue(
+		"apiServerIdleTimeout",
+		"IdleTimeout is the maximum amount of time (in seconds) to wait for the next request when keep-alive is enabled.",
+		int(120),
+	)
 
-	apiServerPrefix *manager.ConfigKey = &manager.ConfigKey{
-		Name:        "apiServerPrefix",
-		Description: "Specify a prefix to serve all routes from, logically. Defaults to ''",
-		TypeOf:      manager.String,
-		DefaultVal:  "",
-		IsSecret:    false,
-	}
+	apiServerPrefix *manager.ConfigValue = manager.NewConfigValue(
+		"apiServerPrefix",
+		"Specify a prefix to serve all routes from, logically. Defaults to ''",
+		"",
+	)
 )
 
-func (s *APIServer) Configs() *[]*manager.ConfigKey {
-	return &[]*manager.ConfigKey{
+func (s *APIServer) Configs() *[]*manager.ConfigValue {
+	return &[]*manager.ConfigValue{
 		apiServerListenPort,
 		apiServerListenIp,
 		apiServerConcurrency,

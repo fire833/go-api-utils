@@ -72,7 +72,7 @@ func (o *OTELManager) Initialize(wg *sync.WaitGroup, reg manager.AppRegistration
 	o.m.Lock()
 	defer o.m.Unlock()
 
-	switch otelExporterType.RetriveValue().(string) {
+	switch otelExporterType.GetString() {
 	case "otlp":
 		{
 			return errors.New("otlp tracing exposition format not implemented")
@@ -86,8 +86,8 @@ func (o *OTELManager) Initialize(wg *sync.WaitGroup, reg manager.AppRegistration
 		{
 			if exp, e := otlptracehttp.New(
 				context.Background(),
-				otlptracehttp.WithEndpoint(otelHTTPExportHost.RetriveValue().(string)),
-				otlptracehttp.WithURLPath(otelHTTPExportPath.RetriveValue().(string)),
+				otlptracehttp.WithEndpoint(otelHTTPExportHost.GetString()),
+				otlptracehttp.WithURLPath(otelHTTPExportPath.GetString()),
 				otlptracehttp.WithInsecure(), // TODO: refactor this so insecure can be configured.
 			); e != nil {
 				return e
@@ -99,8 +99,8 @@ func (o *OTELManager) Initialize(wg *sync.WaitGroup, reg manager.AppRegistration
 		{
 			if exp, e := jaeger.New(
 				jaeger.WithAgentEndpoint(
-					jaeger.WithAgentHost(jaegerExportHost.RetriveValue().(string)),
-					jaeger.WithAgentPort(jaegerExportPort.RetriveValue().(string)),
+					jaeger.WithAgentHost(jaegerExportHost.GetString()),
+					jaeger.WithAgentPort(jaegerExportPort.GetString()),
 				),
 			); e != nil {
 				return e
@@ -151,13 +151,13 @@ func (o *OTELManager) Initialize(wg *sync.WaitGroup, reg manager.AppRegistration
 	// set up the sampler code, including SysAPI routes for modifying which operations will be traced.
 	o.sampleToggle = make(map[string]bool)
 
-	val := otelDefaultTracingStatus.RetriveValue().(bool)
+	val := otelDefaultTracingStatus.GetBool()
 
 	for _, trace := range reg.RegisterOTELTraces() {
 		o.sampleToggle[trace] = val
 	}
 
-	manager.Manager.RegisterSysAPIHandler(fasthttp.MethodGet, "/trace/status", o.statusHandler, spec.PathItem{
+	manager.RegisterSysAPIHandler(fasthttp.MethodGet, "/trace/status", o.statusHandler, spec.PathItem{
 		PathItemProps: spec.PathItemProps{
 			Get: spec.NewOperation("traceStatus").WithDescription("Get the status of all operations enabled to be traced within the running instance.").
 				WithTags("sys", "otel").

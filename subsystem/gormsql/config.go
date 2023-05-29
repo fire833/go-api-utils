@@ -21,57 +21,45 @@ package gormsql
 import manager "github.com/fire833/go-api-utils/mgr"
 
 var (
-	gormSQLBackend *manager.ConfigKey = manager.NewConfigKey(
+	gormSQLBackend *manager.ConfigValue = manager.NewConfigValue(
 		"gormSQLbackend",
 		"Specify the backend that you want to collect data from. Current valid values are sqlite, postgres, or mysql.",
-		manager.String,
 		"sqlite",
-		false,
 	)
 
-	gormSqliteFile *manager.ConfigKey = manager.NewConfigKey(
+	gormSqliteFile *manager.ConfigValue = manager.NewConfigValue(
 		"gormSqliteFile",
 		"Specify the relative or absolute path to a sqlite database file to be read or created by your application. This value will only be read if gormSQLbackend is set to 'sqlite'.",
-		manager.String,
 		"data.db",
-		false,
 	)
 
-	gormSqlHost *manager.ConfigKey = manager.NewConfigKey(
+	gormSqlHost *manager.ConfigValue = manager.NewConfigValue(
 		"gormSqlHost",
 		"Specify the hostname of the remote SQL instance.",
-		manager.String,
 		"localhost",
-		false,
 	)
 
-	gormSqlPort *manager.ConfigKey = manager.NewConfigKey(
+	gormSqlPort *manager.ConfigValue = manager.NewConfigValue(
 		"gormSqlPort",
 		"Specify the port of the remote SQL instance.",
-		manager.Uint16,
-		3306,
-		false,
+		uint16(3306),
 	)
 
-	gormSqlUsername *manager.ConfigKey = manager.NewConfigKey(
+	gormSqlUsername *manager.SecretValue = manager.NewSecretValue(
 		"gormSqlUsername",
 		"Specify the username to connect to the remote SQL instance.",
-		manager.String,
-		nil,
-		true,
+		"",
 	)
 
-	gormSqlPassword *manager.ConfigKey = manager.NewConfigKey(
+	gormSqlPassword *manager.SecretValue = manager.NewSecretValue(
 		"gormSqlPassword",
 		"Specify the password to connect to the remote SQL instance.",
-		manager.String,
-		nil,
-		true,
+		"",
 	)
 )
 
-func (g *GormSQLManager) Configs() *[]*manager.ConfigKey {
-	return &[]*manager.ConfigKey{
+func (g *GormSQLManager) Configs() *[]*manager.ConfigValue {
+	return &[]*manager.ConfigValue{
 		gormSQLBackend,
 		gormSqliteFile,
 		gormSqlHost,

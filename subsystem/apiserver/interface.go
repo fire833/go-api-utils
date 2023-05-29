@@ -88,7 +88,7 @@ func (s *APIServer) Initialize(wg *sync.WaitGroup, reg *manager.SystemRegistrar)
 	})
 
 	// Register from the global object.
-	reg.Registration.RegisterEndpoints(apiServerPrefix.RetriveValue().(string), s.router)
+	reg.Registration.RegisterEndpoints(apiServerPrefix.GetString(), s.router)
 
 	s.server = &fasthttp.Server{
 		Handler: func(ctx *fasthttp.RequestCtx) {
@@ -99,7 +99,7 @@ func (s *APIServer) Initialize(wg *sync.WaitGroup, reg *manager.SystemRegistrar)
 
 		// overwrite the server name for a bit more obfuscation.
 		Name:        "null",
-		Concurrency: apiServerConcurrency.RetriveValue().(int),
+		Concurrency: int(apiServerConcurrency.GetUint()),
 
 		// Just enable this to always true, we shouldn't ever need information leaked.
 		SecureErrorLogMessage: true,
@@ -115,11 +115,11 @@ func (s *APIServer) Initialize(wg *sync.WaitGroup, reg *manager.SystemRegistrar)
 			serialization.NotAcceptableResponseHandler(ctx, e.Error())
 		},
 
-		ReadBufferSize:  apiServerReadBufferSize.RetriveValue().(int),
-		WriteBufferSize: apiServerWriteBufferSize.RetriveValue().(int),
-		ReadTimeout:     time.Duration(time.Second * time.Duration(apiServerReadTimeout.RetriveValue().(int))),
-		WriteTimeout:    time.Duration(time.Second * time.Duration(apiServerWriteTimeout.RetriveValue().(int))),
-		IdleTimeout:     time.Duration(time.Second * time.Duration(apiServerIdleTimeout.RetriveValue().(int))),
+		ReadBufferSize:  int(apiServerReadBufferSize.GetUint()),
+		WriteBufferSize: int(apiServerWriteBufferSize.GetUint()),
+		ReadTimeout:     time.Duration(time.Second * time.Duration(apiServerReadTimeout.GetUint())),
+		WriteTimeout:    time.Duration(time.Second * time.Duration(apiServerWriteTimeout.GetUint())),
+		IdleTimeout:     time.Duration(time.Second * time.Duration(apiServerIdleTimeout.GetUint())),
 	}
 
 	// For now, we don't need the swagger specification to be in memory with the process,
@@ -132,7 +132,7 @@ func (s *APIServer) Initialize(wg *sync.WaitGroup, reg *manager.SystemRegistrar)
 }
 
 func (s *APIServer) SyncStart() {
-	if e := s.server.ListenAndServe(apiServerListenIp.RetriveValue().(string) + ":" + strconv.Itoa(int(apiServerListenPort.RetriveValue().(uint16)))); e != nil {
+	if e := s.server.ListenAndServe(apiServerListenIp.GetString() + ":" + strconv.Itoa(int(apiServerListenPort.GetUint16()))); e != nil {
 		klog.Errorf("unable to start api: %s", e.Error())
 		os.Exit(1) // TODO perhaps make a better exit strategy here.
 	}

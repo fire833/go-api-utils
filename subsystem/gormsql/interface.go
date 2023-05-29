@@ -59,10 +59,12 @@ func (g *GormSQLManager) Initialize(wg *sync.WaitGroup, reg *manager.SystemRegis
 		Help:      "Metrics on the total number of transactions made with this subsystem.",
 	})
 
-	config := &gorm.Config{}
+	config := &gorm.Config{
+		Logger: &gormLogger{},
+	}
 
-	switch gormSQLBackend.RetriveValue().(string) {
-	case "postgres":
+	switch gormSQLBackend.GetString() {
+	case "postgres", "POSTGRES", "Postgres":
 		{
 			if db, e := gorm.Open(postgres.Open(""), config); e == nil {
 				g.db = db
@@ -70,7 +72,7 @@ func (g *GormSQLManager) Initialize(wg *sync.WaitGroup, reg *manager.SystemRegis
 				return e
 			}
 		}
-	case "mysql":
+	case "mysql", "MYSQL", "MySQL":
 		{
 			if db, e := gorm.Open(mysql.Open(""), config); e == nil {
 				g.db = db
@@ -80,7 +82,7 @@ func (g *GormSQLManager) Initialize(wg *sync.WaitGroup, reg *manager.SystemRegis
 		}
 	default:
 		{
-			if db, e := gorm.Open(sqlite.Open(gormSqliteFile.RetriveValue().(string)), config); e == nil {
+			if db, e := gorm.Open(sqlite.Open(gormSqliteFile.GetString()), config); e == nil {
 				g.db = db
 			} else {
 				return e
