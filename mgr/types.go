@@ -55,7 +55,7 @@ import (
 //   be used as a management interface for some kind of controller, that will automatically scale and configure app instances
 //   as loads shifts for different API products.
 //
-type APIManager struct {
+type APIManager[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64] struct {
 	m sync.RWMutex
 
 	registrar *SystemRegistrar
@@ -70,6 +70,9 @@ type APIManager struct {
 
 	// Config contains non-secret key/value data for configuring the process.
 	config *viper.Viper
+
+	ckeys []*ConfigValue[T]
+	skeys []*SecretValue[T]
 
 	// secret contains secrets credentials for configuring the process.
 	// the most prevalent values within this container will be the database user/password.

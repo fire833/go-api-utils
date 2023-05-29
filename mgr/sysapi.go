@@ -33,70 +33,56 @@ import (
 )
 
 type ConfigInfo struct {
-	Meta  *ConfigKey  `json:"meta" yaml:"meta" xml:"meta"`
-	Value interface{} `json:"value" yaml:"value" xml:"value"`
+	Meta  *ConfigValue[string] `json:"meta" yaml:"meta" xml:"meta"`
+	Value interface{}          `json:"value" yaml:"value" xml:"value"`
 }
 
 var (
-	sysAPIListenPort *ConfigKey = &ConfigKey{
-		Name:        "sysAPIListenPort",
-		Description: "Specify the listening port of the sysAPI. Should be an unsigned integer between 1 and 65535, but should be above 1024 preferably to avoid needing CAP_SYS_ADMIN or root privileges for the app process.",
-		TypeOf:      Uint16,
-		DefaultVal:  8081,
-		IsSecret:    false,
-	}
+	sysAPIListenPort *ConfigValue[uint16] = NewConfigValue[uint16](
+		"sysAPIListenPort",
+		"Specify the listening port of the sysAPI. Should be an unsigned integer between 1 and 65535, but should be above 1024 preferably to avoid needing CAP_SYS_ADMIN or root privileges for the app process.",
+		uint16(8081),
+	)
 
-	sysAPIConcurrency *ConfigKey = &ConfigKey{
-		Name:        "sysAPIConcurrency",
-		Description: "Specify the amount of concurrent connections to be allowed to the SysAPI webserver concurrently.",
-		IsSecret:    false,
-		DefaultVal:  1000,
-		TypeOf:      Int,
-	}
+	sysAPIConcurrency *ConfigValue[uint] = NewConfigValue[uint](
+		"sysAPIConcurrency",
+		"Specify the amount of concurrent connections to be allowed to the SysAPI webserver concurrently.",
+		uint(1000),
+	)
 
-	sysAPIReadBufferSize *ConfigKey = &ConfigKey{
-		Name:        "sysAPIReadBufferSize",
-		Description: "Specify per-connection buffer size for requests reading. This also limits the maximum header size. Increase this buffer if your clients send multi-KB RequestURIs and/or multi-KB headers (for example, BIG cookies).",
-		TypeOf:      Int,
-		DefaultVal:  4096,
-		IsSecret:    false,
-	}
+	sysAPIReadBufferSize *ConfigValue[uint] = NewConfigValue[uint](
+		"sysAPIReadBufferSize",
+		"Specify per-connection buffer size for requests reading. This also limits the maximum header size. Increase this buffer if your clients send multi-KB RequestURIs and/or multi-KB headers (for example, BIG cookies).",
+		uint(4096),
+	)
 
-	sysAPIWriteBufferSize *ConfigKey = &ConfigKey{
-		Name:        "sysAPIWriteBufferSize",
-		Description: "Per-connection buffer size for responses writing.",
-		TypeOf:      Int,
-		DefaultVal:  4096,
-		IsSecret:    false,
-	}
+	sysAPIWriteBufferSize *ConfigValue[uint] = NewConfigValue[uint](
+		"sysAPIWriteBufferSize",
+		"Per-connection buffer size for responses writing.",
+		uint(4096),
+	)
 
-	sysAPIReadTimeout *ConfigKey = &ConfigKey{
-		Name:        "sysAPIReadTimeout",
-		Description: "ReadTimeout is the amount of time (in seconds) allowed to read the full request including body. The connection's read deadline is reset when the connection opens, or for keep-alive connections after the first byte has been read.",
-		TypeOf:      Int,
-		DefaultVal:  120,
-		IsSecret:    false,
-	}
+	sysAPIReadTimeout *ConfigValue[uint] = NewConfigValue[uint](
+		"sysAPIReadTimeout",
+		"ReadTimeout is the amount of time (in seconds) allowed to read the full request including body. The connection's read deadline is reset when the connection opens, or for keep-alive connections after the first byte has been read.",
+		uint(120),
+	)
 
-	sysAPIWriteTimeout *ConfigKey = &ConfigKey{
-		Name:        "sysAPIWriteTimeout",
-		Description: "WriteTimeout is the maximum duration (in seconds) before timing out writes of the response. It is reset after the request handler has returned.",
-		TypeOf:      Int,
-		DefaultVal:  120,
-		IsSecret:    false,
-	}
+	sysAPIWriteTimeout *ConfigValue[uint] = NewConfigValue[uint](
+		"sysAPIWriteTimeout",
+		"WriteTimeout is the maximum duration (in seconds) before timing out writes of the response. It is reset after the request handler has returned.",
+		uint(120),
+	)
 
-	sysAPIIdleTimeout *ConfigKey = &ConfigKey{
-		Name:        "sysAPIIdleTimeout",
-		Description: "IdleTimeout is the maximum amount of time (in seconds) to wait for the next request when keep-alive is enabled.",
-		TypeOf:      Int,
-		DefaultVal:  120,
-		IsSecret:    false,
-	}
+	sysAPIIdleTimeout *ConfigValue[uint] = NewConfigValue[uint](
+		"sysAPIIdleTimeout",
+		"IdleTimeout is the maximum amount of time (in seconds) to wait for the next request when keep-alive is enabled.",
+		uint(120),
+	)
 )
 
 func init() {
-	Manager.registerConfigKey(
+	mgr.registerConfigKey(
 		sysAPIListenPort,
 		sysAPIConcurrency,
 		sysAPIReadBufferSize,
@@ -107,7 +93,7 @@ func init() {
 	)
 }
 
-func (m *APIManager) initSysAPI() {
+func (m *APIManager[T]) initSysAPI() {
 	ser := &fasthttp.Server{
 		// overwrite the server name for a bit more obfuscation.
 		Name: "null",
@@ -126,7 +112,7 @@ func (m *APIManager) initSysAPI() {
 			serialization.NotAcceptableResponseHandler(ctx, e.Error())
 		},
 
-		Concurrency:     sysAPIConcurrency.RetriveValue().(int),
+		Concurrency:     sysAPIConcurrency.Get().(int),
 		ReadBufferSize:  sysAPIReadBufferSize.RetriveValue().(int),
 		WriteBufferSize: sysAPIWriteBufferSize.RetriveValue().(int),
 		ReadTimeout:     time.Duration(time.Second * time.Duration(sysAPIReadTimeout.RetriveValue().(int))),
@@ -315,10 +301,15 @@ func (m *APIManager) initSysAPI() {
 	m.router.GET("/configuration", func(ctx *fasthttp.RequestCtx) {
 		var values []ConfigInfo
 
-		for _, key := range m.keys {
+		for _, key := range m.ckeys {
+			k, e := key.Get()
+			if e != nil {
+				k = "error (unset)"
+			}
+
 			values = append(values, ConfigInfo{
 				Meta:  key,
-				Value: key.RetriveValue(),
+				Value: k,
 			})
 		}
 
@@ -334,7 +325,7 @@ func (m *APIManager) initSysAPI() {
 	m.router.GET("/secrets", func(ctx *fasthttp.RequestCtx) {
 		var values []ConfigInfo
 
-		for _, key := range m.secretKeys {
+		for _, key := range m.skeys {
 			values = append(values, ConfigInfo{
 				Meta:  key,
 				Value: "*****",
@@ -366,6 +357,6 @@ func (m *APIManager) initSysAPI() {
 	m.spec = spec
 }
 
-func (m *APIManager) startSysAPI() {
+func (m *APIManager[T]) startSysAPI() {
 	m.server.ListenAndServe(":" + strconv.Itoa(int(sysAPIListenPort.RetriveValue().(uint16))))
 }

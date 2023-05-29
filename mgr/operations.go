@@ -18,7 +18,7 @@
 
 package mgr
 
-func (api *APIManager) watchConfig() {
+func (api *APIManager[T]) watchConfig() {
 	api.config.WatchConfig()
 	api.secrets.WatchConfig()
 }

@@ -36,8 +36,8 @@ import (
 // Return a new, uninitialized APIManager object. Please do not allocate more than one of
 // these objects per process, they are desined to the the PID 1 of a process, and manage the
 // routines of subsystems that perform actual business logic.
-func New() *APIManager {
-	return &APIManager{
+func New[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64]() *APIManager[T] {
+	return &APIManager[T]{
 		count:     0,
 		systems:   make(map[string]Subsystem),
 		shutdown:  make(chan uint8),
@@ -49,23 +49,6 @@ func New() *APIManager {
 		spec:      nil, // Start with null, the spec should be generated on Initialize().
 		server:    nil, // Start with null, the server should be started on Initialize().
 		sigHandle: make(chan os.Signal, 5),
-	}
-}
-
-// Register subsystem should be called in an init function by all subsystems
-// that want to be registered and run by the application at runtime.
-// Please make sure that your subsystem defers WaitGroups provided to it
-// IMMEDIATELY. If you do not do this, then the process will deadlock on startup
-// and you will have a broken process, and then everyone has a bad day.
-func (m *APIManager) registerSubsystem(sub Subsystem) {
-	m.m.Lock()
-	m.systems[sub.Name()] = sub
-	m.registry.Register(sub)
-	m.count++
-	m.m.Unlock()
-
-	if c := sub.Configs(); c != nil {
-		m.registerConfigKey(*c...)
 	}
 }
 
@@ -85,7 +68,7 @@ func (m *APIManager) registerSubsystem(sub Subsystem) {
 // along with this handler registration request, as these will be integrated with the server's
 // swagger spec. These objects will then be served by /swagger.json, and it will make integration
 // MUCH easier if the actual behavior of the endpoint is reflected in the swagger documentation.
-func (m *APIManager) RegisterSysAPIHandler(method, path string, handler fasthttp.RequestHandler, swaggerdoc spec.PathItem, schemas ...*spec.Schema) error {
+func (m *APIManager[T]) RegisterSysAPIHandler(method, path string, handler fasthttp.RequestHandler, swaggerdoc spec.PathItem, schemas ...*spec.Schema) error {
 	m.m.Lock()
 	defer m.m.Unlock()
 
@@ -111,7 +94,7 @@ func (m *APIManager) RegisterSysAPIHandler(method, path string, handler fasthttp
 	return nil
 }
 
-func (m *APIManager) registerConfigKey(keys ...*ConfigKey) {
+func (m *APIManager[T]) registerConfigKey(keys ...*ConfigValue[T]) {
 	m.m.Lock()
 	defer m.m.Unlock()
 
@@ -138,7 +121,7 @@ func (m *APIManager) registerConfigKey(keys ...*ConfigKey) {
 }
 
 // loads in configuration/secrets to override default values with the given application.
-func (m *APIManager) initConfigs() {
+func (m *APIManager[T]) initConfigs() {
 	// Register defaults first.
 	for _, sub := range m.systems {
 		m.registerConfigKey(*sub.Configs()...)
@@ -165,11 +148,7 @@ func (m *APIManager) initConfigs() {
 // Global method used for initializing an APIManager instance. This includes registering
 // signal handlers, creating SysAPI, and starting up all the required subsystems as according to the
 // provided registrar.
-func (m *APIManager) Initialize(registrar *SystemRegistrar) {
-	for _, sys := range registrar.Systems {
-		m.registerSubsystem(sys)
-	}
-
+func (m *APIManager[T]) Initialize(registrar *SystemRegistrar) {
 	// Tell the runtime to forward signals from the OS to this channel for downstream processing.
 	signal.Notify(m.sigHandle)
 
@@ -188,7 +167,7 @@ func (m *APIManager) Initialize(registrar *SystemRegistrar) {
 
 // handleSignals does what you would think, it runs in a loop, blocking and waiting for incoming
 // OS signals, and handling them.
-func (m *APIManager) handleSignals() {
+func (m *APIManager[T]) handleSignals() {
 	for {
 		sig := <-m.sigHandle
 		switch sig {
@@ -213,11 +192,11 @@ func (m *APIManager) handleSignals() {
 // Return all registered ConfigKeys that are set up with this APIManager.
 // These values should be READ ONLY!!! Please do not mutate any of these values after
 // acquiring a reference to the slice.
-func (api *APIManager) GetConfigKeys() []*ConfigKey { return api.keys }
+func (api *APIManager[T]) GetConfigKeys() []*ConfigValue[T] { return api.ckeys }
 
 // Return all registered secret ConfigKeys that are set up with this APIManager.
 // These values should be READ ONLY!!! Please do not mutate any of these values after
 // acquiring a reference to the slice.
-func (api *APIManager) GetSecretConfigKeys() []*ConfigKey { return api.secretKeys }
+func (api *APIManager[T]) GetSecretConfigKeys() []*SecretValue[T] { return api.skeys }
 
 // func (api *APIManager) GetSecretConfigKeys() []*ConfigKey { return api.secretKeys }

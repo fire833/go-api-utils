@@ -21,13 +21,11 @@ package apiserver
 import manager "github.com/fire833/go-api-utils/mgr"
 
 var (
-	apiServerListenPort *manager.ConfigKey = &manager.ConfigKey{
-		Name:        "apiServerListenPort",
-		Description: "Specify the listening port for this instance of APIServer. Should be an unsigned integer between 1 and 65535, but should be above 1024 preferably to avoid needing CAP_SYS_ADMIN or root privileges for the apiAPI process.",
-		TypeOf:      manager.Uint16,
-		DefaultVal:  8080,
-		IsSecret:    false,
-	}
+	apiServerListenPort *manager.ConfigValue[uint16] = manager.NewConfigValue[uint16](
+		"apiServerListenPort",
+		"Specify the listening port for this instance of APIServer. Should be an unsigned integer between 1 and 65535, but should be above 1024 preferably to avoid needing CAP_SYS_ADMIN or root privileges for the apiAPI process.",
+		uint16(8080),
+	)
 
 	apiServerListenIp *manager.ConfigKey = &manager.ConfigKey{
 		Name:        "apiServerListenIp",
@@ -37,7 +35,7 @@ var (
 		IsSecret:    false,
 	}
 
-	apiServerConcurrency *manager.ConfigKey = &manager.ConfigKey{
+	apiServerConcurrency *manager.ConfigValue[int] = manager.NewConfigValue[int]()
 		Name:        "apiServerConcurrency",
 		Description: "Specify the amount of concurrent connections to be allowed to the apiServer webserver concurrently.",
 		IsSecret:    false,

@@ -20,10 +20,10 @@ package mgr
 
 import (
 	"context"
-	"errors"
 	"reflect"
 
 	"github.com/spf13/viper"
+	"k8s.io/klog/v2"
 )
 
 type Value[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64] interface {
@@ -52,8 +52,54 @@ func NewConfigValue[T string | []string | bool | int | []int | uint | uint16 | u
 	}
 }
 
-func (c *ConfigValue[T]) Get() (interface{}, error) {
-	return mgrLGet(false, c.key, c.defaultVal)
+func (c *ConfigValue[T]) GetString() string {
+	defer panicHandler()
+	return mgrLGet(false, c.key, c.defaultVal).(string)
+}
+
+func (c *ConfigValue[T]) GetStringSlice() []string {
+	defer panicHandler()
+	return mgrLGet(false, c.key, c.defaultVal).([]string)
+}
+
+func (c *ConfigValue[T]) GetBool() bool {
+	defer panicHandler()
+	return mgrLGet(false, c.key, c.defaultVal).(bool)
+}
+
+func (c *ConfigValue[T]) GetInt() int {
+	defer panicHandler()
+	return mgrLGet(false, c.key, c.defaultVal).(int)
+}
+
+func (c *ConfigValue[T]) GetIntSlice() []int {
+	defer panicHandler()
+	return mgrLGet(false, c.key, c.defaultVal).([]int)
+}
+
+func (c *ConfigValue[T]) GetUint() uint {
+	defer panicHandler()
+	return mgrLGet(false, c.key, c.defaultVal).(uint)
+}
+
+func (c *ConfigValue[T]) GetUint16() uint16 {
+	defer panicHandler()
+	return mgrLGet(false, c.key, c.defaultVal).(uint16)
+}
+
+func (c *ConfigValue[T]) GetUint32() uint32 {
+	defer panicHandler()
+	return mgrLGet(false, c.key, c.defaultVal).(uint32)
+}
+
+func (c *ConfigValue[T]) GetUint64() uint64 {
+	defer panicHandler()
+	return mgrLGet(false, c.key, c.defaultVal).(uint64)
+}
+
+func (c *ConfigValue[T]) GetFloat64() float64 {
+	defer panicHandler()
+	return mgrLGet(false, c.key, c.defaultVal).(float64)
 }
 
 type SecretValue[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64] struct {
@@ -89,29 +135,121 @@ func NewSecretVaultValue[T string | []string | bool | int | []int | uint | uint1
 	}
 }
 
-func (s *SecretValue[T]) Get() (interface{}, error) {
+func (s *SecretValue[T]) GetString() string {
+	defer panicHandler()
+
 	if !s.vault {
-		return mgrLGet[T](true, s.key, s.defaultVal)
+		return mgrLGet[T](true, s.key, s.defaultVal).(string)
 	} else {
-		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal)
+		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(string)
 	}
 }
 
-func mgrLGet[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64](secret bool, key string, def T) (interface{}, error) {
+func (s *SecretValue[T]) GetStringSlice() []string {
+	defer panicHandler()
+
+	if !s.vault {
+		return mgrLGet[T](true, s.key, s.defaultVal).([]string)
+	} else {
+		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).([]string)
+	}
+}
+
+func (s *SecretValue[T]) GetBool() bool {
+	defer panicHandler()
+
+	if !s.vault {
+		return mgrLGet[T](true, s.key, s.defaultVal).(bool)
+	} else {
+		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(bool)
+	}
+}
+
+func (s *SecretValue[T]) GetInt() int {
+	defer panicHandler()
+
+	if !s.vault {
+		return mgrLGet[T](true, s.key, s.defaultVal).(int)
+	} else {
+		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(int)
+	}
+}
+
+func (s *SecretValue[T]) GetIntSlice() []int {
+	defer panicHandler()
+
+	if !s.vault {
+		return mgrLGet[T](true, s.key, s.defaultVal).([]int)
+	} else {
+		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).([]int)
+	}
+}
+
+func (s *SecretValue[T]) GetUint() uint {
+	defer panicHandler()
+
+	if !s.vault {
+		return mgrLGet[T](true, s.key, s.defaultVal).(uint)
+	} else {
+		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(uint)
+	}
+}
+
+func (s *SecretValue[T]) GetUint16() uint16 {
+	defer panicHandler()
+
+	if !s.vault {
+		return mgrLGet[T](true, s.key, s.defaultVal).(uint16)
+	} else {
+		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(uint16)
+	}
+}
+
+func (s *SecretValue[T]) GetUint32() uint32 {
+	defer panicHandler()
+
+	if !s.vault {
+		return mgrLGet[T](true, s.key, s.defaultVal).(uint32)
+	} else {
+		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(uint32)
+	}
+}
+
+func (s *SecretValue[T]) Get() uint64 {
+	defer panicHandler()
+
+	if !s.vault {
+		return mgrLGet[T](true, s.key, s.defaultVal).(uint64)
+	} else {
+		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(uint64)
+	}
+}
+
+func (s *SecretValue[T]) GetFloat64() float64 {
+	defer panicHandler()
+
+	if !s.vault {
+		return mgrLGet[T](true, s.key, s.defaultVal).(float64)
+	} else {
+		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(float64)
+	}
+}
+
+func mgrLGet[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64](secret bool, key string, def T) interface{} {
 	if mgr == nil {
-		return def, errors.New("manager object not initialized")
+		return def
 	}
 
 	var m *viper.Viper
 	if secret {
 		if mgr.secrets == nil {
-			return nil, errors.New("secrets not initialized")
+			return def
 		}
 
 		m = mgr.secrets
 	} else {
 		if mgr.config == nil {
-			return nil, errors.New("configs not initialized")
+			return def
 		}
 
 		m = mgr.config
@@ -119,47 +257,53 @@ func mgrLGet[T string | []string | bool | int | []int | uint | uint16 | uint32 |
 
 	switch reflect.TypeOf(def).Kind() {
 	case reflect.String:
-		return m.GetString(key), nil
+		return m.GetString(key)
 	case reflect.Bool:
-		return m.GetBool(key), nil
+		return m.GetBool(key)
 	case reflect.Uint:
-		return m.GetUint(key), nil
+		return m.GetUint(key)
 	case reflect.Uint16:
-		return m.GetUint16(key), nil
+		return m.GetUint16(key)
 	case reflect.Uint32:
-		return m.GetUint32(key), nil
+		return m.GetUint32(key)
 	case reflect.Uint64:
-		return m.GetUint64(key), nil
+		return m.GetUint64(key)
 	case reflect.Float64:
-		return m.GetFloat64(key), nil
+		return m.GetFloat64(key)
 	case reflect.Slice:
 		switch reflect.TypeOf(def).Elem().Kind() {
 		case reflect.String:
-			return m.GetStringSlice(key), nil
+			return m.GetStringSlice(key)
 		case reflect.Int:
-			return m.GetIntSlice(key), nil
+			return m.GetIntSlice(key)
 		default:
-			return nil, errors.New("slice type must be either string or int")
+			return def
 		}
 	default:
-		return nil, errors.New("type not defined")
+		return def
 	}
 }
 
-func mgrVGet[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64](key, p1, p2 string, def T) (interface{}, error) {
+func mgrVGet[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64](key, p1, p2 string, def T) interface{} {
 	if mgr.vault == nil {
-		return def, errors.New("vault client not initialized")
+		return def
 	}
 
 	kv := mgr.vault.KVv2(p1)
 
 	if s, e := kv.Get(context.Background(), p2); e != nil {
-		return nil, e
+		return nil
 	} else {
 		if v, ok := s.Data["key"]; ok {
-			return v, nil
+			return v
 		} else {
-			return nil, errors.New("secret not found in location in vault")
+			return def
 		}
+	}
+}
+
+func panicHandler() {
+	if r := recover(); r != nil {
+		klog.Errorf("unable to cast secret to desired type: %v", r)
 	}
 }
