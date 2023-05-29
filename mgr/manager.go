@@ -36,8 +36,8 @@ import (
 // Return a new, uninitialized APIManager object. Please do not allocate more than one of
 // these objects per process, they are desined to the the PID 1 of a process, and manage the
 // routines of subsystems that perform actual business logic.
-func New[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64]() *APIManager[T] {
-	return &APIManager[T]{
+func New() *APIManager {
+	return &APIManager{
 		count:     0,
 		systems:   make(map[string]Subsystem),
 		shutdown:  make(chan uint8),
@@ -68,7 +68,7 @@ func New[T string | []string | bool | int | []int | uint | uint16 | uint32 | uin
 // along with this handler registration request, as these will be integrated with the server's
 // swagger spec. These objects will then be served by /swagger.json, and it will make integration
 // MUCH easier if the actual behavior of the endpoint is reflected in the swagger documentation.
-func (m *APIManager[T]) RegisterSysAPIHandler(method, path string, handler fasthttp.RequestHandler, swaggerdoc spec.PathItem, schemas ...*spec.Schema) error {
+func (m *APIManager) RegisterSysAPIHandler(method, path string, handler fasthttp.RequestHandler, swaggerdoc spec.PathItem, schemas ...*spec.Schema) error {
 	m.m.Lock()
 	defer m.m.Unlock()
 
@@ -94,7 +94,7 @@ func (m *APIManager[T]) RegisterSysAPIHandler(method, path string, handler fasth
 	return nil
 }
 
-func (m *APIManager[T]) registerConfigKey(keys ...*ConfigValue[T]) {
+func (m *APIManager) registerConfigKey(keys ...*ConfigValue) {
 	m.m.Lock()
 	defer m.m.Unlock()
 
@@ -102,31 +102,16 @@ func (m *APIManager[T]) registerConfigKey(keys ...*ConfigValue[T]) {
 		if key == nil {
 			continue
 		}
-
-		if key.IsSecret {
-			if key.DefaultVal != nil {
-				m.secrets.SetDefault(key.Name, key.DefaultVal)
-			}
-
-			m.secretKeys = append(m.secretKeys, key)
-
-		} else {
-			if key.DefaultVal != nil {
-				m.config.SetDefault(key.Name, key.DefaultVal)
-			}
-
-			m.keys = append(m.keys, key)
+		if key.defaultVal != nil {
+			m.config.SetDefault(key.key, key.defaultVal)
 		}
+
+		m.ckeys = append(m.ckeys, key)
 	}
 }
 
 // loads in configuration/secrets to override default values with the given application.
-func (m *APIManager[T]) initConfigs() {
-	// Register defaults first.
-	for _, sub := range m.systems {
-		m.registerConfigKey(*sub.Configs()...)
-	}
-
+func (m *APIManager) initConfigs() {
 	// Configure config file initialization first.
 	m.config.AddConfigPath("/etc/" + m.registrar.AppName)
 	m.config.AddConfigPath("test")
@@ -148,7 +133,7 @@ func (m *APIManager[T]) initConfigs() {
 // Global method used for initializing an APIManager instance. This includes registering
 // signal handlers, creating SysAPI, and starting up all the required subsystems as according to the
 // provided registrar.
-func (m *APIManager[T]) Initialize(registrar *SystemRegistrar) {
+func (m *APIManager) Initialize(registrar *SystemRegistrar) {
 	// Tell the runtime to forward signals from the OS to this channel for downstream processing.
 	signal.Notify(m.sigHandle)
 
@@ -167,7 +152,7 @@ func (m *APIManager[T]) Initialize(registrar *SystemRegistrar) {
 
 // handleSignals does what you would think, it runs in a loop, blocking and waiting for incoming
 // OS signals, and handling them.
-func (m *APIManager[T]) handleSignals() {
+func (m *APIManager) handleSignals() {
 	for {
 		sig := <-m.sigHandle
 		switch sig {
@@ -192,11 +177,11 @@ func (m *APIManager[T]) handleSignals() {
 // Return all registered ConfigKeys that are set up with this APIManager.
 // These values should be READ ONLY!!! Please do not mutate any of these values after
 // acquiring a reference to the slice.
-func (api *APIManager[T]) GetConfigKeys() []*ConfigValue[T] { return api.ckeys }
+func (api *APIManager) GetConfigKeys() []*ConfigValue { return api.ckeys }
 
 // Return all registered secret ConfigKeys that are set up with this APIManager.
 // These values should be READ ONLY!!! Please do not mutate any of these values after
 // acquiring a reference to the slice.
-func (api *APIManager[T]) GetSecretConfigKeys() []*SecretValue[T] { return api.skeys }
+func (api *APIManager) GetSecretConfigKeys() []*SecretValue { return api.skeys }
 
 // func (api *APIManager) GetSecretConfigKeys() []*ConfigKey { return api.secretKeys }

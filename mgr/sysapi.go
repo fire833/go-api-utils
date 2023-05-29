@@ -33,48 +33,48 @@ import (
 )
 
 type ConfigInfo struct {
-	Meta  *ConfigValue[string] `json:"meta" yaml:"meta" xml:"meta"`
-	Value interface{}          `json:"value" yaml:"value" xml:"value"`
+	Meta  *ConfigValue `json:"meta" yaml:"meta" xml:"meta"`
+	Value interface{}  `json:"value" yaml:"value" xml:"value"`
 }
 
 var (
-	sysAPIListenPort *ConfigValue[uint16] = NewConfigValue[uint16](
+	sysAPIListenPort *ConfigValue = NewConfigValue(
 		"sysAPIListenPort",
 		"Specify the listening port of the sysAPI. Should be an unsigned integer between 1 and 65535, but should be above 1024 preferably to avoid needing CAP_SYS_ADMIN or root privileges for the app process.",
 		uint16(8081),
 	)
 
-	sysAPIConcurrency *ConfigValue[uint] = NewConfigValue[uint](
+	sysAPIConcurrency *ConfigValue = NewConfigValue(
 		"sysAPIConcurrency",
 		"Specify the amount of concurrent connections to be allowed to the SysAPI webserver concurrently.",
 		uint(1000),
 	)
 
-	sysAPIReadBufferSize *ConfigValue[uint] = NewConfigValue[uint](
+	sysAPIReadBufferSize *ConfigValue = NewConfigValue(
 		"sysAPIReadBufferSize",
 		"Specify per-connection buffer size for requests reading. This also limits the maximum header size. Increase this buffer if your clients send multi-KB RequestURIs and/or multi-KB headers (for example, BIG cookies).",
 		uint(4096),
 	)
 
-	sysAPIWriteBufferSize *ConfigValue[uint] = NewConfigValue[uint](
+	sysAPIWriteBufferSize *ConfigValue = NewConfigValue(
 		"sysAPIWriteBufferSize",
 		"Per-connection buffer size for responses writing.",
 		uint(4096),
 	)
 
-	sysAPIReadTimeout *ConfigValue[uint] = NewConfigValue[uint](
+	sysAPIReadTimeout *ConfigValue = NewConfigValue(
 		"sysAPIReadTimeout",
 		"ReadTimeout is the amount of time (in seconds) allowed to read the full request including body. The connection's read deadline is reset when the connection opens, or for keep-alive connections after the first byte has been read.",
 		uint(120),
 	)
 
-	sysAPIWriteTimeout *ConfigValue[uint] = NewConfigValue[uint](
+	sysAPIWriteTimeout *ConfigValue = NewConfigValue(
 		"sysAPIWriteTimeout",
 		"WriteTimeout is the maximum duration (in seconds) before timing out writes of the response. It is reset after the request handler has returned.",
 		uint(120),
 	)
 
-	sysAPIIdleTimeout *ConfigValue[uint] = NewConfigValue[uint](
+	sysAPIIdleTimeout *ConfigValue = NewConfigValue(
 		"sysAPIIdleTimeout",
 		"IdleTimeout is the maximum amount of time (in seconds) to wait for the next request when keep-alive is enabled.",
 		uint(120),
@@ -93,7 +93,7 @@ func init() {
 	)
 }
 
-func (m *APIManager[T]) initSysAPI() {
+func (m *APIManager) initSysAPI() {
 	ser := &fasthttp.Server{
 		// overwrite the server name for a bit more obfuscation.
 		Name: "null",
@@ -112,12 +112,12 @@ func (m *APIManager[T]) initSysAPI() {
 			serialization.NotAcceptableResponseHandler(ctx, e.Error())
 		},
 
-		Concurrency:     sysAPIConcurrency.Get().(int),
-		ReadBufferSize:  sysAPIReadBufferSize.RetriveValue().(int),
-		WriteBufferSize: sysAPIWriteBufferSize.RetriveValue().(int),
-		ReadTimeout:     time.Duration(time.Second * time.Duration(sysAPIReadTimeout.RetriveValue().(int))),
-		WriteTimeout:    time.Duration(time.Second * time.Duration(sysAPIWriteTimeout.RetriveValue().(int))),
-		IdleTimeout:     time.Duration(time.Second * time.Duration(sysAPIIdleTimeout.RetriveValue().(int))),
+		Concurrency:     int(sysAPIConcurrency.GetUint()),
+		ReadBufferSize:  int(sysAPIReadBufferSize.GetUint()),
+		WriteBufferSize: int(sysAPIWriteBufferSize.GetUint()),
+		ReadTimeout:     time.Duration(time.Second * time.Duration(sysAPIReadTimeout.GetUint())),
+		WriteTimeout:    time.Duration(time.Second * time.Duration(sysAPIWriteTimeout.GetUint())),
+		IdleTimeout:     time.Duration(time.Second * time.Duration(sysAPIIdleTimeout.GetUint())),
 
 		Handler: m.router.Handler,
 	}
@@ -357,6 +357,6 @@ func (m *APIManager[T]) initSysAPI() {
 	m.spec = spec
 }
 
-func (m *APIManager[T]) startSysAPI() {
+func (m *APIManager) startSysAPI() {
 	m.server.ListenAndServe(":" + strconv.Itoa(int(sysAPIListenPort.RetriveValue().(uint16))))
 }

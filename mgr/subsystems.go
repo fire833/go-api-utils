@@ -28,7 +28,7 @@ import (
 
 // Sync start process should never return until process shutdown has been confirmed and all
 // subsystems have exited as gracefully as possible.
-func (m *APIManager[T]) SyncStartProcess() {
+func (m *APIManager) SyncStartProcess() {
 	go m.handleSignals() // start signal handler
 
 	go m.startSysAPI() // start sysAPI.
@@ -41,7 +41,7 @@ func (m *APIManager[T]) SyncStartProcess() {
 	<-m.shutdown
 }
 
-func (m *APIManager[T]) initializeSubsystems(reg *SystemRegistrar) {
+func (m *APIManager) initializeSubsystems(reg *SystemRegistrar) {
 	wg := new(sync.WaitGroup)
 	wg.Add(int(m.count))
 
@@ -80,7 +80,7 @@ func (m *APIManager[T]) initializeSubsystems(reg *SystemRegistrar) {
 	wg.Wait()
 }
 
-func (m *APIManager[T]) reloadSubsystems() {
+func (m *APIManager) reloadSubsystems() {
 	klog.V(4).Infof("reload signal received, forwarding to %d subsystems", m.count)
 
 	wg := new(sync.WaitGroup)
@@ -105,7 +105,7 @@ func (m *APIManager[T]) reloadSubsystems() {
 	klog.V(5).Info("reloading of subsystems complete")
 }
 
-func (m *APIManager[T]) shutdownSubsystems() {
+func (m *APIManager) shutdownSubsystems() {
 	klog.V(4).Infof("shutdown signal received, forwarding to %d subsystems", m.count)
 
 	wg := new(sync.WaitGroup)
@@ -132,7 +132,7 @@ func (m *APIManager[T]) shutdownSubsystems() {
 	}
 }
 
-func (m *APIManager[T]) setGlobals() {
+func (m *APIManager) setGlobals() {
 	for _, sub := range m.systems {
 		sub.SetGlobal()
 	}

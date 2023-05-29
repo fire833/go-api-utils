@@ -37,25 +37,24 @@ import (
 //
 // - Registering signal handlers and then "forwarding" those signals to invidual subsystems of the process to handle.
 //
-// - Deserializing configuration from multiple locations within the environment (primarily /etc/<app name>) and providing APIs
-//   for subsystems to easily access those configuration parameters for their successful use. Some examples of this are
-//   the database user/password that is managed by APIManager and accessed by the SQLManager subsystem for connecting to
-//   the backing database. Another example could be configuring concurrency on the primary HTTP server. The server subsystem
-//   retrieves the integer value through APIManager internal APIs, and is able to go on its merry way with serving up requests.
+//   - Deserializing configuration from multiple locations within the environment (primarily /etc/<app name>) and providing APIs
+//     for subsystems to easily access those configuration parameters for their successful use. Some examples of this are
+//     the database user/password that is managed by APIManager and accessed by the SQLManager subsystem for connecting to
+//     the backing database. Another example could be configuring concurrency on the primary HTTP server. The server subsystem
+//     retrieves the integer value through APIManager internal APIs, and is able to go on its merry way with serving up requests.
 //
-// - Managing subsystems, and sending signals to subsystems whenever a "config reload" signal is sent to the process, or a
-//   shutdown signal is sent to the process, things like the database driver need to gracefully end all transactions and cut off
-//   TCP sockets to the DB. Same thing on the frontend, the webserver needs to close out all remaining sockets and requests.
-//   For more information on the callbacks to manage subsystems that are invoked by the APIManager, please refer to the Subsystem
-//   interface in types.go.
+//   - Managing subsystems, and sending signals to subsystems whenever a "config reload" signal is sent to the process, or a
+//     shutdown signal is sent to the process, things like the database driver need to gracefully end all transactions and cut off
+//     TCP sockets to the DB. Same thing on the frontend, the webserver needs to close out all remaining sockets and requests.
+//     For more information on the callbacks to manage subsystems that are invoked by the APIManager, please refer to the Subsystem
+//     interface in types.go.
 //
-// - Exposing a systems API for introspection into the inner workings of the app process. This includes exposing things such
-//   as the swagger docs for the sysAPI itself, exposing all prometheus metrics, exposing readiness/liveness endpoints for the process
-//   as a whole as well as individual subsystems, subsystem statistics, and much more. The idea long term is for this API to also
-//   be used as a management interface for some kind of controller, that will automatically scale and configure app instances
-//   as loads shifts for different API products.
-//
-type APIManager[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64] struct {
+//   - Exposing a systems API for introspection into the inner workings of the app process. This includes exposing things such
+//     as the swagger docs for the sysAPI itself, exposing all prometheus metrics, exposing readiness/liveness endpoints for the process
+//     as a whole as well as individual subsystems, subsystem statistics, and much more. The idea long term is for this API to also
+//     be used as a management interface for some kind of controller, that will automatically scale and configure app instances
+//     as loads shifts for different API products.
+type APIManager struct {
 	m sync.RWMutex
 
 	registrar *SystemRegistrar
@@ -71,8 +70,8 @@ type APIManager[T string | []string | bool | int | []int | uint | uint16 | uint3
 	// Config contains non-secret key/value data for configuring the process.
 	config *viper.Viper
 
-	ckeys []*ConfigValue[T]
-	skeys []*SecretValue[T]
+	ckeys []*ConfigValue
+	skeys []*SecretValue
 
 	// secret contains secrets credentials for configuring the process.
 	// the most prevalent values within this container will be the database user/password.

@@ -26,25 +26,20 @@ import (
 	"k8s.io/klog/v2"
 )
 
-type Value[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64] interface {
-}
-
-type genericValue[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64] struct {
-	Value[T]
-
+type genericValue struct {
 	key  string
 	desc string
 
-	defaultVal T
+	defaultVal interface{}
 }
 
-type ConfigValue[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64] struct {
-	genericValue[T]
+type ConfigValue struct {
+	genericValue
 }
 
-func NewConfigValue[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64](key, desc string, defVal T) *ConfigValue[T] {
-	return &ConfigValue[T]{
-		genericValue: genericValue[T]{
+func NewConfigValue(key, desc string, defVal interface{}) *ConfigValue {
+	return &ConfigValue{
+		genericValue: genericValue{
 			key:        key,
 			desc:       desc,
 			defaultVal: defVal,
@@ -52,58 +47,58 @@ func NewConfigValue[T string | []string | bool | int | []int | uint | uint16 | u
 	}
 }
 
-func (c *ConfigValue[T]) GetString() string {
+func (c *ConfigValue) GetString() string {
 	defer panicHandler()
 	return mgrLGet(false, c.key, c.defaultVal).(string)
 }
 
-func (c *ConfigValue[T]) GetStringSlice() []string {
+func (c *ConfigValue) GetStringSlice() []string {
 	defer panicHandler()
 	return mgrLGet(false, c.key, c.defaultVal).([]string)
 }
 
-func (c *ConfigValue[T]) GetBool() bool {
+func (c *ConfigValue) GetBool() bool {
 	defer panicHandler()
 	return mgrLGet(false, c.key, c.defaultVal).(bool)
 }
 
-func (c *ConfigValue[T]) GetInt() int {
+func (c *ConfigValue) GetInt() int {
 	defer panicHandler()
 	return mgrLGet(false, c.key, c.defaultVal).(int)
 }
 
-func (c *ConfigValue[T]) GetIntSlice() []int {
+func (c *ConfigValue) GetIntSlice() []int {
 	defer panicHandler()
 	return mgrLGet(false, c.key, c.defaultVal).([]int)
 }
 
-func (c *ConfigValue[T]) GetUint() uint {
+func (c *ConfigValue) GetUint() uint {
 	defer panicHandler()
 	return mgrLGet(false, c.key, c.defaultVal).(uint)
 }
 
-func (c *ConfigValue[T]) GetUint16() uint16 {
+func (c *ConfigValue) GetUint16() uint16 {
 	defer panicHandler()
 	return mgrLGet(false, c.key, c.defaultVal).(uint16)
 }
 
-func (c *ConfigValue[T]) GetUint32() uint32 {
+func (c *ConfigValue) GetUint32() uint32 {
 	defer panicHandler()
 	return mgrLGet(false, c.key, c.defaultVal).(uint32)
 }
 
-func (c *ConfigValue[T]) GetUint64() uint64 {
+func (c *ConfigValue) GetUint64() uint64 {
 	defer panicHandler()
 	return mgrLGet(false, c.key, c.defaultVal).(uint64)
 }
 
-func (c *ConfigValue[T]) GetFloat64() float64 {
+func (c *ConfigValue) GetFloat64() float64 {
 	defer panicHandler()
 	return mgrLGet(false, c.key, c.defaultVal).(float64)
 }
 
-type SecretValue[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64] struct {
-	genericValue[T]
+type SecretValue struct {
+	genericValue
 
 	mountpath  string
 	secretpath string
@@ -111,9 +106,9 @@ type SecretValue[T string | []string | bool | int | []int | uint | uint16 | uint
 	vault bool
 }
 
-func NewSecretValue[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64](key, desc string, defVal T) *SecretValue[T] {
-	return &SecretValue[T]{
-		genericValue: genericValue[T]{
+func NewSecretValue(key, desc string, defVal interface{}) *SecretValue {
+	return &SecretValue{
+		genericValue: genericValue{
 			key:        key,
 			desc:       desc,
 			defaultVal: defVal,
@@ -122,9 +117,9 @@ func NewSecretValue[T string | []string | bool | int | []int | uint | uint16 | u
 	}
 }
 
-func NewSecretVaultValue[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64](key, desc string, defVal T, mountpath, secretpath string) *SecretValue[T] {
-	return &SecretValue[T]{
-		genericValue: genericValue[T]{
+func NewSecretVaultValue(key, desc string, defVal interface{}, mountpath, secretpath string) *SecretValue {
+	return &SecretValue{
+		genericValue: genericValue{
 			key:        key,
 			desc:       desc,
 			defaultVal: defVal,
@@ -135,107 +130,107 @@ func NewSecretVaultValue[T string | []string | bool | int | []int | uint | uint1
 	}
 }
 
-func (s *SecretValue[T]) GetString() string {
+func (s *SecretValue) GetString() string {
 	defer panicHandler()
 
 	if !s.vault {
-		return mgrLGet[T](true, s.key, s.defaultVal).(string)
+		return mgrLGet(true, s.key, s.defaultVal).(string)
 	} else {
-		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(string)
+		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(string)
 	}
 }
 
-func (s *SecretValue[T]) GetStringSlice() []string {
+func (s *SecretValue) GetStringSlice() []string {
 	defer panicHandler()
 
 	if !s.vault {
-		return mgrLGet[T](true, s.key, s.defaultVal).([]string)
+		return mgrLGet(true, s.key, s.defaultVal).([]string)
 	} else {
-		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).([]string)
+		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).([]string)
 	}
 }
 
-func (s *SecretValue[T]) GetBool() bool {
+func (s *SecretValue) GetBool() bool {
 	defer panicHandler()
 
 	if !s.vault {
-		return mgrLGet[T](true, s.key, s.defaultVal).(bool)
+		return mgrLGet(true, s.key, s.defaultVal).(bool)
 	} else {
-		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(bool)
+		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(bool)
 	}
 }
 
-func (s *SecretValue[T]) GetInt() int {
+func (s *SecretValue) GetInt() int {
 	defer panicHandler()
 
 	if !s.vault {
-		return mgrLGet[T](true, s.key, s.defaultVal).(int)
+		return mgrLGet(true, s.key, s.defaultVal).(int)
 	} else {
-		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(int)
+		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(int)
 	}
 }
 
-func (s *SecretValue[T]) GetIntSlice() []int {
+func (s *SecretValue) GetIntSlice() []int {
 	defer panicHandler()
 
 	if !s.vault {
-		return mgrLGet[T](true, s.key, s.defaultVal).([]int)
+		return mgrLGet(true, s.key, s.defaultVal).([]int)
 	} else {
-		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).([]int)
+		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).([]int)
 	}
 }
 
-func (s *SecretValue[T]) GetUint() uint {
+func (s *SecretValue) GetUint() uint {
 	defer panicHandler()
 
 	if !s.vault {
-		return mgrLGet[T](true, s.key, s.defaultVal).(uint)
+		return mgrLGet(true, s.key, s.defaultVal).(uint)
 	} else {
-		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(uint)
+		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(uint)
 	}
 }
 
-func (s *SecretValue[T]) GetUint16() uint16 {
+func (s *SecretValue) GetUint16() uint16 {
 	defer panicHandler()
 
 	if !s.vault {
-		return mgrLGet[T](true, s.key, s.defaultVal).(uint16)
+		return mgrLGet(true, s.key, s.defaultVal).(uint16)
 	} else {
-		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(uint16)
+		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(uint16)
 	}
 }
 
-func (s *SecretValue[T]) GetUint32() uint32 {
+func (s *SecretValue) GetUint32() uint32 {
 	defer panicHandler()
 
 	if !s.vault {
-		return mgrLGet[T](true, s.key, s.defaultVal).(uint32)
+		return mgrLGet(true, s.key, s.defaultVal).(uint32)
 	} else {
-		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(uint32)
+		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(uint32)
 	}
 }
 
-func (s *SecretValue[T]) Get() uint64 {
+func (s *SecretValue) Get() uint64 {
 	defer panicHandler()
 
 	if !s.vault {
-		return mgrLGet[T](true, s.key, s.defaultVal).(uint64)
+		return mgrLGet(true, s.key, s.defaultVal).(uint64)
 	} else {
-		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(uint64)
+		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(uint64)
 	}
 }
 
-func (s *SecretValue[T]) GetFloat64() float64 {
+func (s *SecretValue) GetFloat64() float64 {
 	defer panicHandler()
 
 	if !s.vault {
-		return mgrLGet[T](true, s.key, s.defaultVal).(float64)
+		return mgrLGet(true, s.key, s.defaultVal).(float64)
 	} else {
-		return mgrVGet[T](s.key, s.mountpath, s.secretpath, s.defaultVal).(float64)
+		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(float64)
 	}
 }
 
-func mgrLGet[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64](secret bool, key string, def T) interface{} {
+func mgrLGet(secret bool, key string, def interface{}) interface{} {
 	if mgr == nil {
 		return def
 	}
@@ -284,7 +279,7 @@ func mgrLGet[T string | []string | bool | int | []int | uint | uint16 | uint32 |
 	}
 }
 
-func mgrVGet[T string | []string | bool | int | []int | uint | uint16 | uint32 | uint64 | float64](key, p1, p2 string, def T) interface{} {
+func mgrVGet(key, p1, p2 string, def interface{}) interface{} {
 	if mgr.vault == nil {
 		return def
 	}
