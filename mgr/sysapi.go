@@ -37,6 +37,11 @@ type ConfigInfo struct {
 	Value interface{}  `json:"value" yaml:"value" xml:"value"`
 }
 
+type SecretInfo struct {
+	Meta  *SecretValue `json:"meta" yaml:"meta" xml:"meta"`
+	Value interface{}  `json:"value" yaml:"value" xml:"value"`
+}
+
 var (
 	sysAPIListenPort *ConfigValue = NewConfigValue(
 		"sysAPIListenPort",
@@ -302,11 +307,7 @@ func (m *APIManager) initSysAPI() {
 		var values []ConfigInfo
 
 		for _, key := range m.ckeys {
-			k, e := key.Get()
-			if e != nil {
-				k = "error (unset)"
-			}
-
+			k := key.Get()
 			values = append(values, ConfigInfo{
 				Meta:  key,
 				Value: k,
@@ -323,10 +324,10 @@ func (m *APIManager) initSysAPI() {
 	})
 
 	m.router.GET("/secrets", func(ctx *fasthttp.RequestCtx) {
-		var values []ConfigInfo
+		var values []SecretInfo
 
 		for _, key := range m.skeys {
-			values = append(values, ConfigInfo{
+			values = append(values, SecretInfo{
 				Meta:  key,
 				Value: "*****",
 			})

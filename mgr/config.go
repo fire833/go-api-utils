@@ -47,6 +47,11 @@ func NewConfigValue(key, desc string, defVal interface{}) *ConfigValue {
 	}
 }
 
+func (c *ConfigValue) Get() interface{} {
+	defer panicHandler()
+	return mgrLGet(false, c.key, c.defaultVal)
+}
+
 func (c *ConfigValue) GetString() string {
 	defer panicHandler()
 	return mgrLGet(false, c.key, c.defaultVal).(string)
@@ -130,6 +135,16 @@ func NewSecretVaultValue(key, desc string, defVal interface{}, mountpath, secret
 	}
 }
 
+func (s *SecretValue) Get() interface{} {
+	defer panicHandler()
+
+	if !s.vault {
+		return mgrLGet(true, s.key, s.defaultVal)
+	} else {
+		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal)
+	}
+}
+
 func (s *SecretValue) GetString() string {
 	defer panicHandler()
 
@@ -210,7 +225,7 @@ func (s *SecretValue) GetUint32() uint32 {
 	}
 }
 
-func (s *SecretValue) Get() uint64 {
+func (s *SecretValue) GetUint64() uint64 {
 	defer panicHandler()
 
 	if !s.vault {

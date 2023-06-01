@@ -64,6 +64,11 @@ func (g *GormSQLManager) Configs() *[]*manager.ConfigValue {
 		gormSqliteFile,
 		gormSqlHost,
 		gormSqlPort,
+	}
+}
+
+func (g *GormSQLManager) Secrets() *[]*manager.SecretValue {
+	return &[]*manager.SecretValue{
 		gormSqlUsername,
 		gormSqlPassword,
 	}

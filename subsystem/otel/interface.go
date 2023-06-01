@@ -165,7 +165,7 @@ func (o *OTELManager) Initialize(wg *sync.WaitGroup, reg manager.AppRegistration
 		},
 	}, samplerStatus)
 
-	manager.Manager.RegisterSysAPIHandler(fasthttp.MethodPut, "/trace/enable/{NAME}", o.enable, spec.PathItem{
+	manager.RegisterSysAPIHandler(fasthttp.MethodPut, "/trace/enable/{NAME}", o.enable, spec.PathItem{
 		PathItemProps: spec.PathItemProps{
 			Put: spec.NewOperation("enableTrace").WithDescription("Enable one or all traces for all internal Objects being served by this instance.").
 				WithTags("sys", "otel").
@@ -175,7 +175,7 @@ func (o *OTELManager) Initialize(wg *sync.WaitGroup, reg manager.AppRegistration
 		},
 	})
 
-	manager.Manager.RegisterSysAPIHandler(fasthttp.MethodPut, "/trace/disable/{NAME}", o.disable, spec.PathItem{
+	manager.RegisterSysAPIHandler(fasthttp.MethodPut, "/trace/disable/{NAME}", o.disable, spec.PathItem{
 		PathItemProps: spec.PathItemProps{
 			Put: spec.NewOperation("disableTrace").WithDescription("Disable one or all traces for all internal Objects being served by this instance.").
 				WithTags("sys", "otel").
