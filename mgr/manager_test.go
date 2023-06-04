@@ -42,8 +42,8 @@ func TestAPIManager_RegisterSysAPIHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := New()
-			if err := m.RegisterSysAPIHandler(tt.args.method, tt.args.path, tt.args.handler, tt.args.swaggerdoc, tt.args.schemas...); (err != nil) != tt.wantErr {
+			_ = New()
+			if err := RegisterSysAPIHandler(tt.args.method, tt.args.path, tt.args.handler, tt.args.swaggerdoc, tt.args.schemas...); (err != nil) != tt.wantErr {
 				t.Errorf("APIManager.RegisterSysAPIHandler() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

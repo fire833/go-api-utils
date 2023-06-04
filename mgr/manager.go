@@ -37,7 +37,7 @@ import (
 // these objects per process, they are desined to the the PID 1 of a process, and manage the
 // routines of subsystems that perform actual business logic.
 func New() *APIManager {
-	return &APIManager{
+	m := &APIManager{
 		count:     0,
 		systems:   make(map[string]Subsystem),
 		shutdown:  make(chan uint8),
@@ -50,6 +50,9 @@ func New() *APIManager {
 		server:    nil, // Start with null, the server should be started on Initialize().
 		sigHandle: make(chan os.Signal, 5),
 	}
+
+	mgr = m
+	return m
 }
 
 // For subsystems which need to have viewports/logic exposed through SysAPI,
@@ -68,7 +71,12 @@ func New() *APIManager {
 // along with this handler registration request, as these will be integrated with the server's
 // swagger spec. These objects will then be served by /swagger.json, and it will make integration
 // MUCH easier if the actual behavior of the endpoint is reflected in the swagger documentation.
-func (m *APIManager) RegisterSysAPIHandler(method, path string, handler fasthttp.RequestHandler, swaggerdoc spec.PathItem, schemas ...*spec.Schema) error {
+func RegisterSysAPIHandler(method, path string, handler fasthttp.RequestHandler, swaggerdoc spec.PathItem, schemas ...*spec.Schema) error {
+	m := mgr
+	if m == nil {
+		return errors.New("global APIManager not initialized")
+	}
+
 	m.m.Lock()
 	defer m.m.Unlock()
 
