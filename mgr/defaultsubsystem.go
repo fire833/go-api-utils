@@ -49,6 +49,14 @@ func (d *DefaultSubsystem) Initialize(wg *sync.WaitGroup, reg *SystemRegistrar) 
 // NOP SyncStart
 func (d *DefaultSubsystem) SyncStart() {}
 
+func (d *DefaultSubsystem) Configs() *[]*ConfigValue {
+	return &[]*ConfigValue{}
+}
+
+func (d *DefaultSubsystem) Secrets() *[]*SecretValue {
+	return &[]*SecretValue{}
+}
+
 // NOP to reload the subsystem
 func (d *DefaultSubsystem) Reload(wg *sync.WaitGroup) { wg.Done() }
 

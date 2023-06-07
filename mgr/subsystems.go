@@ -31,7 +31,9 @@ import (
 func (m *APIManager) SyncStartProcess() {
 	go m.handleSignals() // start signal handler
 
-	go m.startSysAPI() // start sysAPI.
+	if m.opts.EnableSysAPI {
+		go m.startSysAPI() // start sysAPI.
+	}
 
 	for name, sys := range m.systems {
 		klog.V(4).Infof("synchronously starting subsystem %s", name)
@@ -61,7 +63,7 @@ func (m *APIManager) initializeSubsystems(reg *SystemRegistrar) {
 				wgInt.Add(1)
 
 				if e := s.Initialize(wgInt, reg); e != nil {
-					klog.Errorf("unable to initialize subsystem %s %d times. Waiting 10 seconds to retry", s.Name(), i)
+					klog.Errorf("unable to initialize subsystem %s (error: %s) %d times. Waiting 10 seconds to retry", s.Name(), e.Error(), i)
 					time.Sleep(time.Second * 10) // Wait for 10 seconds to try and reinitialize
 					continue
 				} else {

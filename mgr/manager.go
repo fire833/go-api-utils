@@ -36,9 +36,10 @@ import (
 // Return a new, uninitialized APIManager object. Please do not allocate more than one of
 // these objects per process, they are desined to the the PID 1 of a process, and manage the
 // routines of subsystems that perform actual business logic.
-func New() *APIManager {
+func New(opts *APIManagerOpts) *APIManager {
 	m := &APIManager{
 		count:     0,
+		opts:      opts,
 		systems:   make(map[string]Subsystem),
 		shutdown:  make(chan uint8),
 		config:    viper.New(),
@@ -51,7 +52,12 @@ func New() *APIManager {
 		sigHandle: make(chan os.Signal, 5),
 	}
 
-	mgr = m
+	if mgr == nil {
+		mgr = m
+	} else {
+		panic("manager already initialized")
+	}
+
 	return m
 }
 
@@ -102,22 +108,6 @@ func RegisterSysAPIHandler(method, path string, handler fasthttp.RequestHandler,
 	return nil
 }
 
-func (m *APIManager) registerConfigKey(keys ...*ConfigValue) {
-	m.m.Lock()
-	defer m.m.Unlock()
-
-	for _, key := range keys {
-		if key == nil {
-			continue
-		}
-		if key.defaultVal != nil {
-			m.config.SetDefault(key.key, key.defaultVal)
-		}
-
-		m.ckeys = append(m.ckeys, key)
-	}
-}
-
 // loads in configuration/secrets to override default values with the given application.
 func (m *APIManager) initConfigs() {
 	// Configure config file initialization first.
@@ -147,11 +137,25 @@ func (m *APIManager) Initialize(registrar *SystemRegistrar) {
 
 	m.registrar = registrar
 
+	for name, sys := range m.systems {
+		configs := *sys.Configs()
+		klog.V(5).Infof("registering %d config keys for subsystem %s", len(configs), name)
+
+		m.ckeys = append(m.ckeys, configs...)
+
+		secrets := *sys.Secrets()
+		klog.V(5).Infof("registering %d secret keys for subsystem %s", len(secrets), name)
+
+		m.skeys = append(m.skeys, secrets...)
+	}
+
 	// read in configuration and secrets before booting further, or at least attempt to.
 	m.initConfigs()
 
 	// Set up the sysAPI and all its handlers.
-	m.initSysAPI()
+	if m.opts.EnableSysAPI {
+		m.initSysAPI()
+	}
 
 	m.initializeSubsystems(registrar)
 
@@ -182,14 +186,12 @@ func (m *APIManager) handleSignals() {
 	}
 }
 
-// Return all registered ConfigKeys that are set up with this APIManager.
+// Return all registered ConfigValues that are set up with this APIManager.
 // These values should be READ ONLY!!! Please do not mutate any of these values after
 // acquiring a reference to the slice.
-func (api *APIManager) GetConfigKeys() []*ConfigValue { return api.ckeys }
+func (api *APIManager) GetConfigValues() []*ConfigValue { return api.ckeys }
 
-// Return all registered secret ConfigKeys that are set up with this APIManager.
+// Return all registered secret SecretValues that are set up with this APIManager.
 // These values should be READ ONLY!!! Please do not mutate any of these values after
 // acquiring a reference to the slice.
-func (api *APIManager) GetSecretConfigKeys() []*SecretValue { return api.skeys }
-
-// func (api *APIManager) GetSecretConfigKeys() []*ConfigKey { return api.secretKeys }
+func (api *APIManager) GetSecretValues() []*SecretValue { return api.skeys }

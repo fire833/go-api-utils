@@ -57,6 +57,8 @@ import (
 type APIManager struct {
 	m sync.RWMutex
 
+	opts *APIManagerOpts
+
 	registrar *SystemRegistrar
 
 	// Count is the current count of subsystems that are registered with the manager.
@@ -101,6 +103,13 @@ type APIManager struct {
 	sigHandle chan os.Signal
 }
 
+// General purpose options for creating a new APIManager. These generally are options that
+// will be set at compile time and shouldn't need to be worried about at runtime.
+type APIManagerOpts struct {
+	// Toggle whether the SysAPI should be advertised with this process.
+	EnableSysAPI bool
+}
+
 // Subsystem is a component of app that is bootstrapped by the manager upon process startup.
 // Each subsystem needs to be registered with an init() method to the APIManager in order for
 // its callbacks to be invoked at the proper times on process startup. For an example of a bare-bones
@@ -118,6 +127,12 @@ type Subsystem interface {
 	// fail out if the pointer is nil, otherwise can be followed to where the initialized and running
 	// subsystem is located.
 	SetGlobal()
+
+	// Configs and Secrets return the ConfigValues and SecretValues for the subsystem for management
+	// by the APIMAnager. This includes adding defaults to viper and populating configuration
+	// defaulting commands.
+	Configs() *[]*ConfigValue
+	Secrets() *[]*SecretValue
 
 	// Starts up this subsystem, if it returns an error, will try to reinitalize
 	// the subsystem with backoff until an error is no longer returned.

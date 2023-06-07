@@ -86,18 +86,6 @@ var (
 	)
 )
 
-func init() {
-	mgr.registerConfigKey(
-		sysAPIListenPort,
-		sysAPIConcurrency,
-		sysAPIReadBufferSize,
-		sysAPIWriteBufferSize,
-		sysAPIReadTimeout,
-		sysAPIWriteTimeout,
-		sysAPIIdleTimeout,
-	)
-}
-
 func (m *APIManager) initSysAPI() {
 	ser := &fasthttp.Server{
 		// overwrite the server name for a bit more obfuscation.
