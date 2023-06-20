@@ -37,7 +37,6 @@ func FuzzParseint(f *testing.F) {
 	f.Fuzz(func(t *testing.T, input []byte) {
 		_, e := Parseint(input)
 		if e != nil {
-
 		}
 	})
 }

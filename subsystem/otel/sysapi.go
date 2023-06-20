@@ -30,46 +30,43 @@ import (
 //go:generate protoc --vtobj_out=. --vtobj_opt=Motel.proto=../otel otel.proto
 //go:generate protoc --go_out=. --go_opt=Motel.proto=../otel otel_list.proto
 
-var (
-	samplerStatus *spec.Schema = &spec.Schema{
-		SchemaProps: spec.SchemaProps{
-			Title:       "SamplerStatusList",
-			Description: "Serialized object containing the enablement status of all trace operations within the current running instance.",
-			Type:        []string{"object"},
-			Format:      "",
-			Properties: spec.SchemaProperties{
-				"items": *spec.ArrayProperty(&spec.Schema{
-					SchemaProps: spec.SchemaProps{
-						Title:       "SamplerStatus",
-						Description: "The name and status of a trace operation in the current instance.",
-						Type:        []string{"object"},
-						Format:      "",
-						Properties: spec.SchemaProperties{
-							"name": {
-								SchemaProps: spec.SchemaProps{
-									Title:  "name",
-									Type:   []string{"string"},
-									Format: "",
-								},
+var samplerStatus *spec.Schema = &spec.Schema{
+	SchemaProps: spec.SchemaProps{
+		Title:       "SamplerStatusList",
+		Description: "Serialized object containing the enablement status of all trace operations within the current running instance.",
+		Type:        []string{"object"},
+		Format:      "",
+		Properties: spec.SchemaProperties{
+			"items": *spec.ArrayProperty(&spec.Schema{
+				SchemaProps: spec.SchemaProps{
+					Title:       "SamplerStatus",
+					Description: "The name and status of a trace operation in the current instance.",
+					Type:        []string{"object"},
+					Format:      "",
+					Properties: spec.SchemaProperties{
+						"name": {
+							SchemaProps: spec.SchemaProps{
+								Title:  "name",
+								Type:   []string{"string"},
+								Format: "",
 							},
-							"enabled": {
-								SchemaProps: spec.SchemaProps{
-									Title:  "enabled",
-									Type:   []string{"boolean"},
-									Format: "",
-								},
+						},
+						"enabled": {
+							SchemaProps: spec.SchemaProps{
+								Title:  "enabled",
+								Type:   []string{"boolean"},
+								Format: "",
 							},
 						},
 					},
-				}),
-			},
+				},
+			}),
 		},
-	}
-)
+	},
+}
 
 // Function to return the status of all trace operations and whether they are enabled.
 func (o *OTELManager) statusHandler(ctx *fasthttp.RequestCtx) {
-
 	list := []*SamplerStatus{}
 
 	for name, value := range o.sampleToggle {
@@ -82,7 +79,6 @@ func (o *OTELManager) statusHandler(ctx *fasthttp.RequestCtx) {
 	serialization.MarshalBodyByAcceptHeader(ctx, &SamplerStatusList{
 		Items: list,
 	})
-
 }
 
 // method for enabling tracing for certain objects within a running app instance.

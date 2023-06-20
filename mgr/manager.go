@@ -180,7 +180,6 @@ func (m *APIManager) handleSignals() {
 			}
 		default:
 			{
-
 			}
 		}
 	}

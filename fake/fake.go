@@ -72,7 +72,7 @@ func FakeStringCeil(ceil int) string {
 }
 
 func FakeStringLen(length int) string {
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	letters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 	s := make([]rune, length)
 	for i := range s {
 		s[i] = letters[rand.Intn(len(letters))]

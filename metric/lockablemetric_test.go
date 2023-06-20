@@ -23,7 +23,6 @@ import (
 )
 
 func BenchmarkLockableMetric(b *testing.B) {
-
 	lock := NewLockableMetric()
 
 	b.ResetTimer()

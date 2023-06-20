@@ -31,9 +31,7 @@ import (
 
 const GormSQLSubsystemName = "gormsql"
 
-var (
-	SQL *GormSQLManager
-)
+var SQL *GormSQLManager
 
 type GormSQLManager struct {
 	manager.DefaultSubsystem

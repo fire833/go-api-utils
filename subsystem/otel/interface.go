@@ -45,9 +45,7 @@ const (
 	SamplerDesc          string = "appSampler"
 )
 
-var (
-	OTEL *OTELManager
-)
+var OTEL *OTELManager
 
 type OTELManager struct {
 	manager.DefaultSubsystem
