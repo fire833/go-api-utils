@@ -137,6 +137,10 @@ func (m *APIManager) Initialize(registrar *SystemRegistrar) {
 
 	m.registrar = registrar
 
+	for _, sys := range registrar.Systems {
+		m.systems[sys.Name()] = sys
+	}
+
 	for name, sys := range m.systems {
 		configs := *sys.Configs()
 		klog.V(5).Infof("registering %d config keys for subsystem %s", len(configs), name)
