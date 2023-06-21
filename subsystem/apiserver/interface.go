@@ -1,7 +1,6 @@
 package apiserver
 
 import (
-	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -133,7 +132,7 @@ func (s *APIServer) SyncStart() {
 	klog.V(2).Infof("serving apiserver on %s:%d", apiServerListenIp.GetString(), apiServerListenPort.GetUint16())
 	if e := s.server.ListenAndServe(apiServerListenIp.GetString() + ":" + strconv.Itoa(int(apiServerListenPort.GetUint16()))); e != nil {
 		klog.Errorf("unable to start api: %s", e.Error())
-		os.Exit(1) // TODO perhaps make a better exit strategy here.
+		// os.Exit(1) // TODO perhaps make a better exit strategy here.
 	}
 }
 

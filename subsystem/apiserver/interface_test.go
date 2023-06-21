@@ -49,3 +49,38 @@ func BenchmarkRouter1(b *testing.B) {
 		router.Handler(ctx)
 	}
 }
+
+// var mr *APIServer
+
+// type regDef struct {
+// 	mgr.AppRegistration
+// }
+
+// func TestMain(m *testing.M) {
+// 	var flag flag.FlagSet
+// 	klog.InitFlags(&flag)
+// 	flag.Set("v", strconv.Itoa(10))
+// }
+
+// func TestDefaultSync(t *testing.T) {
+// 	reg := mgr.NewRegistrar("test", &regDef{}, New())
+
+// 	wg := new(sync.WaitGroup)
+// 	wg.Add(1)
+
+// 	if e := mr.Initialize(wg, reg); e != nil {
+// 		t.Logf("wanted no error: got %v", e)
+// 		t.Fail()
+// 	}
+
+// 	mr.SetGlobal()
+// 	t.Logf("starting server...")
+// 	go mr.SyncStart()
+
+// 	conn, e := net.Dial("tcp", apiServerListenIp.GetString()+":"+strconv.Itoa(int(apiServerListenPort.GetUint16())))
+// 	if e != nil {
+// 		t.Logf("unabel to dial server: %v", e)
+// 	}
+
+// 	conn.Close()
+// }
