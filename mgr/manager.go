@@ -138,6 +138,7 @@ func (m *APIManager) Initialize(registrar *SystemRegistrar) {
 	m.registrar = registrar
 
 	for _, sys := range registrar.Systems {
+		m.count++
 		m.systems[sys.Name()] = sys
 	}
 

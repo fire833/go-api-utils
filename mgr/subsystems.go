@@ -45,7 +45,7 @@ func (m *APIManager) SyncStartProcess() {
 
 func (m *APIManager) initializeSubsystems(reg *SystemRegistrar) {
 	wg := new(sync.WaitGroup)
-	wg.Add(int(m.count))
+	wg.Add(int(len(m.systems)))
 
 	for name, sys := range m.systems {
 		klog.V(3).Infof("initializing subsystem %s", name)
