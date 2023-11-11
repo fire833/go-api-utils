@@ -62,11 +62,13 @@ func (m *APIManager) initializeSubsystems(reg *SystemRegistrar) {
 				wgInt := new(sync.WaitGroup)
 				wgInt.Add(1)
 
-				if e := s.Initialize(wgInt, reg); e != nil {
+				if e := s.Initialize(reg); e != nil {
 					klog.Errorf("unable to initialize subsystem %s (error: %s) %d times. Waiting 10 seconds to retry", s.Name(), e.Error(), i)
+					wgInt.Done()
 					time.Sleep(time.Second * 10) // Wait for 10 seconds to try and reinitialize
 					continue
 				} else {
+					wgInt.Done()
 					return
 				}
 			}
@@ -97,10 +99,9 @@ func (m *APIManager) reloadSubsystems() {
 				}
 			}()
 
-			sys.Reload(wg)
+			sys.Reload()
+			wg.Done()
 		}(sys, wg)
-
-		sys.Reload(wg)
 	}
 
 	wg.Wait()
@@ -122,7 +123,8 @@ func (m *APIManager) shutdownSubsystems() {
 				}
 			}()
 
-			sys.Shutdown(wg)
+			sys.Shutdown()
+			wg.Done()
 		}(sys, wg)
 	}
 
@@ -134,8 +136,14 @@ func (m *APIManager) shutdownSubsystems() {
 	}
 }
 
-func (m *APIManager) setGlobals() {
+func (m *APIManager) preInit() {
 	for _, sub := range m.systems {
-		sub.SetGlobal()
+		sub.PreInit()
+	}
+}
+
+func (m *APIManager) postInit() {
+	for _, sub := range m.systems {
+		sub.PostInit()
 	}
 }

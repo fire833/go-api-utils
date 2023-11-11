@@ -20,6 +20,7 @@ package mgr
 
 import (
 	"context"
+	"path/filepath"
 	"reflect"
 
 	"github.com/spf13/viper"
@@ -105,7 +106,6 @@ func (c *ConfigValue) GetFloat64() float64 {
 type SecretValue struct {
 	genericValue
 
-	mountpath  string
 	secretpath string
 
 	vault bool
@@ -129,7 +129,6 @@ func NewSecretVaultValue(key, desc string, defVal interface{}, mountpath, secret
 			desc:       desc,
 			defaultVal: defVal,
 		},
-		mountpath:  mountpath,
 		secretpath: secretpath,
 		vault:      true,
 	}
@@ -141,7 +140,7 @@ func (s *SecretValue) Get() interface{} {
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal)
 	} else {
-		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal)
+		return mgrVGet(s.key, s.secretpath, s.defaultVal)
 	}
 }
 
@@ -151,7 +150,7 @@ func (s *SecretValue) GetString() string {
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(string)
 	} else {
-		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(string)
+		return mgrVGet(s.key, s.secretpath, s.defaultVal).(string)
 	}
 }
 
@@ -161,7 +160,7 @@ func (s *SecretValue) GetStringSlice() []string {
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).([]string)
 	} else {
-		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).([]string)
+		return mgrVGet(s.key, s.secretpath, s.defaultVal).([]string)
 	}
 }
 
@@ -171,7 +170,7 @@ func (s *SecretValue) GetBool() bool {
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(bool)
 	} else {
-		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(bool)
+		return mgrVGet(s.key, s.secretpath, s.defaultVal).(bool)
 	}
 }
 
@@ -181,7 +180,7 @@ func (s *SecretValue) GetInt() int {
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(int)
 	} else {
-		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(int)
+		return mgrVGet(s.key, s.secretpath, s.defaultVal).(int)
 	}
 }
 
@@ -191,7 +190,7 @@ func (s *SecretValue) GetIntSlice() []int {
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).([]int)
 	} else {
-		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).([]int)
+		return mgrVGet(s.key, s.secretpath, s.defaultVal).([]int)
 	}
 }
 
@@ -201,7 +200,7 @@ func (s *SecretValue) GetUint() uint {
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(uint)
 	} else {
-		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(uint)
+		return mgrVGet(s.key, s.secretpath, s.defaultVal).(uint)
 	}
 }
 
@@ -211,7 +210,7 @@ func (s *SecretValue) GetUint16() uint16 {
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(uint16)
 	} else {
-		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(uint16)
+		return mgrVGet(s.key, s.secretpath, s.defaultVal).(uint16)
 	}
 }
 
@@ -221,7 +220,7 @@ func (s *SecretValue) GetUint32() uint32 {
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(uint32)
 	} else {
-		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(uint32)
+		return mgrVGet(s.key, s.secretpath, s.defaultVal).(uint32)
 	}
 }
 
@@ -231,7 +230,7 @@ func (s *SecretValue) GetUint64() uint64 {
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(uint64)
 	} else {
-		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(uint64)
+		return mgrVGet(s.key, s.secretpath, s.defaultVal).(uint64)
 	}
 }
 
@@ -241,7 +240,7 @@ func (s *SecretValue) GetFloat64() float64 {
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(float64)
 	} else {
-		return mgrVGet(s.key, s.mountpath, s.secretpath, s.defaultVal).(float64)
+		return mgrVGet(s.key, s.secretpath, s.defaultVal).(float64)
 	}
 }
 
@@ -294,17 +293,19 @@ func mgrLGet(secret bool, key string, def interface{}) interface{} {
 	}
 }
 
-func mgrVGet(key, p1, p2 string, def interface{}) interface{} {
+func mgrVGet(key, path string, def interface{}) interface{} {
+	mount := filepath.Dir(path)
+	sec := filepath.Base(path)
+
 	if mgr.vault == nil {
+		klog.Warningf("vault not enabled in manager, unable to access secret %s, relying on defaults", key)
 		return def
 	}
 
-	kv := mgr.vault.KVv2(p1)
-
-	if s, e := kv.Get(context.Background(), p2); e != nil {
-		return nil
+	if s, e := mgr.vault.KVv2(mount).Get(context.Background(), sec); e != nil {
+		return def
 	} else {
-		if v, ok := s.Data["key"]; ok {
+		if v, ok := s.Data[key]; ok {
 			return v
 		} else {
 			return def

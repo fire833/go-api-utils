@@ -21,5 +21,12 @@ package mgr
 import "testing"
 
 func TestMain(m *testing.M) {
+	New(&APIManagerOpts{
+		EnableSysAPI: false,
+	})
+
 	m.Run()
+}
+
+func TestStartup(t *testing.T) {
 }

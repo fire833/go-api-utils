@@ -19,6 +19,7 @@
 package mgr
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -27,6 +28,8 @@ import (
 
 	"github.com/fasthttp/router"
 	"github.com/go-openapi/spec"
+	"github.com/hashicorp/vault/api"
+	k8sauth "github.com/hashicorp/vault/api/auth/kubernetes"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	"github.com/valyala/fasthttp"
@@ -128,6 +131,32 @@ func (m *APIManager) initConfigs() {
 	}
 }
 
+func (m *APIManager) initVault() {
+	var client *api.Client
+
+	if m.vault != nil {
+		client = m.vault
+	} else {
+		conf := api.DefaultConfig()
+
+		conf.Address = m.config.GetString("vaultAddress")
+		conf.ConfigureTLS(&api.TLSConfig{
+			Insecure: m.config.GetBool("vaultSslInsecure"),
+		})
+		client, _ = api.NewClient(conf)
+	}
+
+	k8s, e := k8sauth.NewKubernetesAuth(m.config.GetString("vaultK8sRole"), k8sauth.WithMountPath(m.config.GetString("vaultK8sAuthMountPath")))
+	if e != nil {
+	}
+
+	_, e = client.Auth().Login(context.Background(), k8s)
+	if e != nil {
+	}
+
+	m.vault = client
+}
+
 // Global method used for initializing an APIManager instance. This includes registering
 // signal handlers, creating SysAPI, and starting up all the required subsystems as according to the
 // provided registrar.
@@ -156,15 +185,16 @@ func (m *APIManager) Initialize(registrar *SystemRegistrar) {
 
 	// read in configuration and secrets before booting further, or at least attempt to.
 	m.initConfigs()
+	m.initVault()
 
 	// Set up the sysAPI and all its handlers.
 	if m.opts.EnableSysAPI {
 		m.initSysAPI()
 	}
 
+	m.preInit()
 	m.initializeSubsystems(registrar)
-
-	m.setGlobals()
+	m.postInit()
 }
 
 // handleSignals does what you would think, it runs in a loop, blocking and waiting for incoming
@@ -188,6 +218,11 @@ func (m *APIManager) handleSignals() {
 			}
 		}
 	}
+}
+
+func (api *APIManager) watchConfig() {
+	api.config.WatchConfig()
+	api.secrets.WatchConfig()
 }
 
 // Return all registered ConfigValues that are set up with this APIManager.
