@@ -169,6 +169,10 @@ func (m *APIManager) initVault() {
 // signal handlers, creating SysAPI, and starting up all the required subsystems as according to the
 // provided registrar.
 func (m *APIManager) Initialize(registrar *SystemRegistrar) {
+	if registrar == nil {
+		return
+	}
+
 	// Tell the runtime to forward signals from the OS to this channel for downstream processing.
 	signal.Notify(m.sigHandle)
 

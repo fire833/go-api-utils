@@ -53,6 +53,26 @@ func main() {
 			return e
 		}
 
+		_, e = kv.NewSecretV2(ctx, "test1", &kv.SecretV2Args{
+			Mount:    kvMnt.Path,
+			Name:     pulumi.String("test1"),
+			DataJson: pulumi.String(`{"key1":"foobar1", "key2":"foobar2"}`),
+		})
+
+		if e != nil {
+			return e
+		}
+
+		_, e = kv.NewSecretV2(ctx, "test2", &kv.SecretV2Args{
+			Mount:    kvMnt.Path,
+			Name:     pulumi.String("test2"),
+			DataJson: pulumi.String(`{"key1":true, "key2":10003}`),
+		})
+
+		if e != nil {
+			return e
+		}
+
 		return nil
 	})
 }

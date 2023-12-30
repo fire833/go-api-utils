@@ -122,7 +122,7 @@ func NewSecretValue(key, desc string, defVal interface{}) *SecretValue {
 	}
 }
 
-func NewSecretVaultValue(key, desc string, defVal interface{}, mountpath, secretpath string) *SecretValue {
+func NewSecretVaultValue(key, desc string, defVal interface{}, secretpath string) *SecretValue {
 	return &SecretValue{
 		genericValue: genericValue{
 			key:        key,
@@ -303,11 +303,13 @@ func mgrVGet(key, path string, def interface{}) interface{} {
 	}
 
 	if s, e := mgr.vault.KVv2(mount).Get(context.Background(), sec); e != nil {
+		klog.Warningf("unable to retrieve vault secret: %v, relying on defaults", e)
 		return def
 	} else {
 		if v, ok := s.Data[key]; ok {
 			return v
 		} else {
+			klog.Warningf("key not found within secret %s, relying on defaults", key)
 			return def
 		}
 	}
