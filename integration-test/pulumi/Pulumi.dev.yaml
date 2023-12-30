@@ -1,0 +1,4 @@
+encryptionsalt: v1:HBENWTH7d90=:v1:dD/dHurG1v28HsdG:N9ER8DtJcqrAXMKcuy85wW+glYRtUw==
+config:
+  vault:address: http://localhost:8000
+  vault:skip_tls_verify: "true"

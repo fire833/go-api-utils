@@ -59,16 +59,11 @@ func (m *APIManager) initializeSubsystems(reg *SystemRegistrar) {
 					}
 				}()
 
-				wgInt := new(sync.WaitGroup)
-				wgInt.Add(1)
-
 				if e := s.Initialize(reg); e != nil {
 					klog.Errorf("unable to initialize subsystem %s (error: %s) %d times. Waiting 10 seconds to retry", s.Name(), e.Error(), i)
-					wgInt.Done()
 					time.Sleep(time.Second * 10) // Wait for 10 seconds to try and reinitialize
 					continue
 				} else {
-					wgInt.Done()
 					return
 				}
 			}
@@ -131,8 +126,10 @@ func (m *APIManager) shutdownSubsystems() {
 	wg.Wait()
 	klog.V(5).Info("shutdown of subsystems complete")
 
-	if e := m.server.Shutdown(); e != nil {
-		klog.Errorf("unable to gracefully shutdown sysAPI: %v", e)
+	if m.server != nil {
+		if e := m.server.Shutdown(); e != nil {
+			klog.Errorf("unable to gracefully shutdown sysAPI: %v", e)
+		}
 	}
 }
 

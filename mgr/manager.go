@@ -114,7 +114,7 @@ func RegisterSysAPIHandler(method, path string, handler fasthttp.RequestHandler,
 // loads in configuration/secrets to override default values with the given application.
 func (m *APIManager) initConfigs() {
 	// Configure config file initialization first.
-	m.config.AddConfigPath("/etc/" + m.registrar.AppName)
+	m.config.AddConfigPath("/etc/" + m.registrar.AppName + "/config")
 	m.config.AddConfigPath("test")
 	m.config.SetConfigName("config")
 
@@ -143,15 +143,23 @@ func (m *APIManager) initVault() {
 		conf.ConfigureTLS(&api.TLSConfig{
 			Insecure: m.config.GetBool("vaultSslInsecure"),
 		})
+
 		client, _ = api.NewClient(conf)
 	}
 
-	k8s, e := k8sauth.NewKubernetesAuth(m.config.GetString("vaultK8sRole"), k8sauth.WithMountPath(m.config.GetString("vaultK8sAuthMountPath")))
-	if e != nil {
-	}
+	vaultToken := os.Getenv("VAULT_TOKEN")
 
-	_, e = client.Auth().Login(context.Background(), k8s)
-	if e != nil {
+	if vaultToken == "" {
+		k8s, e := k8sauth.NewKubernetesAuth(m.config.GetString("vaultK8sRole"), k8sauth.WithMountPath(m.config.GetString("vaultK8sAuthMountPath")))
+		if e != nil {
+			klog.Errorf("unable to retrieve kubernetes auth credentials: %v", e)
+		}
+		_, e = client.Auth().Login(context.Background(), k8s)
+		if e != nil {
+			klog.Errorf("unable to login with kubernetes auth: %v", e)
+		}
+	} else {
+		client.SetToken(vaultToken)
 	}
 
 	m.vault = client
@@ -185,7 +193,10 @@ func (m *APIManager) Initialize(registrar *SystemRegistrar) {
 
 	// read in configuration and secrets before booting further, or at least attempt to.
 	m.initConfigs()
-	m.initVault()
+
+	if m.opts.EnableVault {
+		m.initVault()
+	}
 
 	// Set up the sysAPI and all its handlers.
 	if m.opts.EnableSysAPI {

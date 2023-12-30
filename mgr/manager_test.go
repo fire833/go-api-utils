@@ -18,15 +18,54 @@
 
 package mgr
 
-import "testing"
+import (
+	"testing"
+
+	"k8s.io/klog/v2"
+)
 
 func TestMain(m *testing.M) {
-	New(&APIManagerOpts{
-		EnableSysAPI: false,
-	})
-
 	m.Run()
 }
 
+func loadSimpleApp() *APIManager {
+	// Reset the manager to nil on every test
+	mgr = nil
+
+	reg := &SystemRegistrar{
+		AppName: "foo",
+		Systems: []Subsystem{
+			newMockSubsystem("thing1", 0.3, 0.2, 1),
+			newMockSubsystem("thing2", 0.5, 0.1, 1.12),
+			newMockSubsystem("thing3", 0.2, 0.3, 0.86),
+			newMockSubsystem("thing4", 0.11, 0.2, 0.6),
+			newMockSubsystem("thing5", 0.13, 0.5, 0.3),
+		},
+	}
+
+	m := New(&APIManagerOpts{})
+	m.Initialize(reg)
+	return m
+}
+
 func TestStartup(t *testing.T) {
+	t.Run("simpleStartStop", func(t *testing.T) {
+		m := loadSimpleApp()
+
+		go m.SyncStartProcess()
+
+		klog.Info("sending shutdown for process")
+		m.shutdownSubsystems()
+	})
+
+	t.Run("reload", func(t *testing.T) {
+		m := loadSimpleApp()
+
+		go m.SyncStartProcess()
+
+		m.reloadSubsystems()
+		m.reloadSubsystems()
+
+		m.shutdownSubsystems()
+	})
 }

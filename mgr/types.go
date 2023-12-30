@@ -109,10 +109,8 @@ type APIManagerOpts struct {
 	// Toggle whether the SysAPI should be advertised with this process.
 	EnableSysAPI bool
 
-	// Optionally provide a URL to a vault instance to interface with. If this string is
-	// empty and the process needs to access vault, it will look for a URL in the VAULT_URL
-	// envvar.
-	VaultURL string
+	// Toggle whether secrets will be retrieved by vault within this application.
+	EnableVault bool
 }
 
 // Subsystem is a component of app that is bootstrapped by the manager upon process startup.
