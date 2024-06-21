@@ -66,7 +66,7 @@ var (
 	apiServerIdleTimeout *manager.ConfigValue = manager.NewConfigValue(
 		"apiServerIdleTimeout",
 		"IdleTimeout is the maximum amount of time (in seconds) to wait for the next request when keep-alive is enabled.",
-		int(120),
+		uint(120),
 	)
 
 	apiServerPrefix *manager.ConfigValue = manager.NewConfigValue(

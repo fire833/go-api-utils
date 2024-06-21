@@ -85,8 +85,10 @@ func (s *APIServer) Initialize(wg *sync.WaitGroup, reg *manager.SystemRegistrar)
 	})
 
 	// Register from the global object.
+	klog.V(5).Info("api: registering api endpoints to router")
 	reg.Registration.RegisterEndpoints(apiServerPrefix.GetString(), s.router)
 
+	klog.V(5).Info("api: initializing fasthttp server")
 	s.server = &fasthttp.Server{
 		Handler: func(ctx *fasthttp.RequestCtx) {
 			defer s.requestCount.Inc()

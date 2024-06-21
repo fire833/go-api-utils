@@ -126,7 +126,7 @@ func (m *APIManager) shutdownSubsystems() {
 	wg.Wait()
 	klog.V(5).Info("shutdown of subsystems complete")
 
-	if m.server != nil {
+	if m.opts.EnableSysAPI {
 		if e := m.server.Shutdown(); e != nil {
 			klog.Errorf("unable to gracefully shutdown sysAPI: %v", e)
 		}

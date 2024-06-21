@@ -49,57 +49,57 @@ func NewConfigValue(key, desc string, defVal interface{}) *ConfigValue {
 }
 
 func (c *ConfigValue) Get() interface{} {
-	defer panicHandler()
+	defer panicHandler(c.key)
 	return mgrLGet(false, c.key, c.defaultVal)
 }
 
 func (c *ConfigValue) GetString() string {
-	defer panicHandler()
+	defer panicHandler(c.key)
 	return mgrLGet(false, c.key, c.defaultVal).(string)
 }
 
 func (c *ConfigValue) GetStringSlice() []string {
-	defer panicHandler()
+	defer panicHandler(c.key)
 	return mgrLGet(false, c.key, c.defaultVal).([]string)
 }
 
 func (c *ConfigValue) GetBool() bool {
-	defer panicHandler()
+	defer panicHandler(c.key)
 	return mgrLGet(false, c.key, c.defaultVal).(bool)
 }
 
 func (c *ConfigValue) GetInt() int {
-	defer panicHandler()
+	defer panicHandler(c.key)
 	return mgrLGet(false, c.key, c.defaultVal).(int)
 }
 
 func (c *ConfigValue) GetIntSlice() []int {
-	defer panicHandler()
+	defer panicHandler(c.key)
 	return mgrLGet(false, c.key, c.defaultVal).([]int)
 }
 
 func (c *ConfigValue) GetUint() uint {
-	defer panicHandler()
+	defer panicHandler(c.key)
 	return mgrLGet(false, c.key, c.defaultVal).(uint)
 }
 
 func (c *ConfigValue) GetUint16() uint16 {
-	defer panicHandler()
+	defer panicHandler(c.key)
 	return mgrLGet(false, c.key, c.defaultVal).(uint16)
 }
 
 func (c *ConfigValue) GetUint32() uint32 {
-	defer panicHandler()
+	defer panicHandler(c.key)
 	return mgrLGet(false, c.key, c.defaultVal).(uint32)
 }
 
 func (c *ConfigValue) GetUint64() uint64 {
-	defer panicHandler()
+	defer panicHandler(c.key)
 	return mgrLGet(false, c.key, c.defaultVal).(uint64)
 }
 
 func (c *ConfigValue) GetFloat64() float64 {
-	defer panicHandler()
+	defer panicHandler(c.key)
 	return mgrLGet(false, c.key, c.defaultVal).(float64)
 }
 
@@ -135,7 +135,7 @@ func NewSecretVaultValue(key, desc string, defVal interface{}, secretpath string
 }
 
 func (s *SecretValue) Get() interface{} {
-	defer panicHandler()
+	defer panicHandler(s.key)
 
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal)
@@ -145,7 +145,7 @@ func (s *SecretValue) Get() interface{} {
 }
 
 func (s *SecretValue) GetString() string {
-	defer panicHandler()
+	defer panicHandler(s.key)
 
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(string)
@@ -155,7 +155,7 @@ func (s *SecretValue) GetString() string {
 }
 
 func (s *SecretValue) GetStringSlice() []string {
-	defer panicHandler()
+	defer panicHandler(s.key)
 
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).([]string)
@@ -165,7 +165,7 @@ func (s *SecretValue) GetStringSlice() []string {
 }
 
 func (s *SecretValue) GetBool() bool {
-	defer panicHandler()
+	defer panicHandler(s.key)
 
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(bool)
@@ -175,7 +175,7 @@ func (s *SecretValue) GetBool() bool {
 }
 
 func (s *SecretValue) GetInt() int {
-	defer panicHandler()
+	defer panicHandler(s.key)
 
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(int)
@@ -185,7 +185,7 @@ func (s *SecretValue) GetInt() int {
 }
 
 func (s *SecretValue) GetIntSlice() []int {
-	defer panicHandler()
+	defer panicHandler(s.key)
 
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).([]int)
@@ -195,7 +195,7 @@ func (s *SecretValue) GetIntSlice() []int {
 }
 
 func (s *SecretValue) GetUint() uint {
-	defer panicHandler()
+	defer panicHandler(s.key)
 
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(uint)
@@ -205,7 +205,7 @@ func (s *SecretValue) GetUint() uint {
 }
 
 func (s *SecretValue) GetUint16() uint16 {
-	defer panicHandler()
+	defer panicHandler(s.key)
 
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(uint16)
@@ -215,7 +215,7 @@ func (s *SecretValue) GetUint16() uint16 {
 }
 
 func (s *SecretValue) GetUint32() uint32 {
-	defer panicHandler()
+	defer panicHandler(s.key)
 
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(uint32)
@@ -225,7 +225,7 @@ func (s *SecretValue) GetUint32() uint32 {
 }
 
 func (s *SecretValue) GetUint64() uint64 {
-	defer panicHandler()
+	defer panicHandler(s.key)
 
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(uint64)
@@ -235,7 +235,7 @@ func (s *SecretValue) GetUint64() uint64 {
 }
 
 func (s *SecretValue) GetFloat64() float64 {
-	defer panicHandler()
+	defer panicHandler(s.key)
 
 	if !s.vault {
 		return mgrLGet(true, s.key, s.defaultVal).(float64)
@@ -315,8 +315,8 @@ func mgrVGet(key, path string, def interface{}) interface{} {
 	}
 }
 
-func panicHandler() {
+func panicHandler(name string) {
 	if r := recover(); r != nil {
-		klog.Errorf("unable to cast secret to desired type: %v", r)
+		klog.Errorf("unable to cast secret %s to desired type: %v", name, r)
 	}
 }
