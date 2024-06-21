@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2023 Kendall Tauser
+*	Copyright (C) 2024 Kendall Tauser
 *
 *	This program is free software; you can redistribute it and/or modify
 *	it under the terms of the GNU General Public License as published by
@@ -108,6 +108,9 @@ type APIManager struct {
 type APIManagerOpts struct {
 	// Toggle whether the SysAPI should be advertised with this process.
 	EnableSysAPI bool
+
+	// Toggle whether secrets will be retrieved by vault within this application.
+	EnableVault bool
 }
 
 // Subsystem is a component of app that is bootstrapped by the manager upon process startup.
@@ -122,11 +125,9 @@ type Subsystem interface {
 	// Return the name of this subsystem for referencing.
 	Name() string
 
-	// Optionally, can set a global variable to point to the initialized subsystem object.
-	// This can be useful for global functions to point to a central state location, and then check and
-	// fail out if the pointer is nil, otherwise can be followed to where the initialized and running
-	// subsystem is located.
-	SetGlobal()
+	// Optional hooks to be run before subsystem initialization.
+	PreInit()
+	PostInit()
 
 	// Configs and Secrets return the ConfigValues and SecretValues for the subsystem for management
 	// by the APIMAnager. This includes adding defaults to viper and populating configuration
@@ -138,7 +139,7 @@ type Subsystem interface {
 	// the subsystem with backoff until an error is no longer returned.
 	//
 	// The waitgroup should be immediately deferred in the called function.
-	Initialize(wg *sync.WaitGroup, reg *SystemRegistrar) error
+	Initialize(reg *SystemRegistrar) error
 
 	// If a subsystem needs to be synchronously called by the manager (IE you will call a method
 	// that should never return), wrap that method here and it will be held open by the manager
@@ -149,13 +150,13 @@ type Subsystem interface {
 	// to inform the subsystem to refresh itself given the new configuration changes.
 	//
 	// The waitgroup should be immediately deferred in the called function.
-	Reload(wg *sync.WaitGroup)
+	Reload()
 
 	// If a kill signal is sent to the process, the manager will inform all subsystems of shutdown
 	// through this callback.
 	//
 	// The waitgroup should be immediately deferred in the called function.
-	Shutdown(wg *sync.WaitGroup)
+	Shutdown()
 
 	// This callback can be invoked at any point in execution by the manager to determine the
 	// current status of the subsystem.

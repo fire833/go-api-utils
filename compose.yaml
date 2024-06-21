@@ -1,5 +1,5 @@
 
-# Copyright (C) 2023 Kendall Tauser
+# Copyright (C) 2024 Kendall Tauser
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,3 +24,5 @@ services:
     - vault
   vault:
     image: docker.io/vault:1.13.3
+    ports:
+    - "8000:8200/tcp"

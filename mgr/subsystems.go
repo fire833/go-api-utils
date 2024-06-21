@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2023 Kendall Tauser
+*	Copyright (C) 2024 Kendall Tauser
 *
 *	This program is free software; you can redistribute it and/or modify
 *	it under the terms of the GNU General Public License as published by
@@ -59,10 +59,7 @@ func (m *APIManager) initializeSubsystems(reg *SystemRegistrar) {
 					}
 				}()
 
-				wgInt := new(sync.WaitGroup)
-				wgInt.Add(1)
-
-				if e := s.Initialize(wgInt, reg); e != nil {
+				if e := s.Initialize(reg); e != nil {
 					klog.Errorf("unable to initialize subsystem %s (error: %s) %d times. Waiting 10 seconds to retry", s.Name(), e.Error(), i)
 					time.Sleep(time.Second * 10) // Wait for 10 seconds to try and reinitialize
 					continue
@@ -97,10 +94,9 @@ func (m *APIManager) reloadSubsystems() {
 				}
 			}()
 
-			sys.Reload(wg)
+			sys.Reload()
+			wg.Done()
 		}(sys, wg)
-
-		sys.Reload(wg)
 	}
 
 	wg.Wait()
@@ -122,14 +118,14 @@ func (m *APIManager) shutdownSubsystems() {
 				}
 			}()
 
-			sys.Shutdown(wg)
+			sys.Shutdown()
+			wg.Done()
 		}(sys, wg)
 	}
 
 	wg.Wait()
 	klog.V(5).Info("shutdown of subsystems complete")
 
-	// Only try and shutdown sysAPI if enabled
 	if m.opts.EnableSysAPI {
 		if e := m.server.Shutdown(); e != nil {
 			klog.Errorf("unable to gracefully shutdown sysAPI: %v", e)
@@ -137,8 +133,14 @@ func (m *APIManager) shutdownSubsystems() {
 	}
 }
 
-func (m *APIManager) setGlobals() {
+func (m *APIManager) preInit() {
 	for _, sub := range m.systems {
-		sub.SetGlobal()
+		sub.PreInit()
+	}
+}
+
+func (m *APIManager) postInit() {
+	for _, sub := range m.systems {
+		sub.PostInit()
 	}
 }
