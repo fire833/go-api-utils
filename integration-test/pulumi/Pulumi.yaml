@@ -15,14 +15,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-services:
-  testbed:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    depends_on:
-    - vault
-  vault:
-    image: docker.io/vault:1.13.3
-    ports:
-    - "8000:8200/tcp"
+name: go-api-utils-int
+runtime: go
+description: Integration Test Stack for go-api-utils
+main: main.go
