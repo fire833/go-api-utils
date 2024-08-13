@@ -67,7 +67,9 @@ type APIManager struct {
 	// Map of all subsystem names mapped to their backing implementations.
 	systems map[string]Subsystem
 
-	vault *vault.Client
+	// Stuff for vault
+	vault         *vault.Client
+	secretRenewer *vault.LifetimeWatcher
 
 	// Config contains non-secret key/value data for configuring the process.
 	config *viper.Viper

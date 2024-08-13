@@ -94,6 +94,12 @@ func (m *APIManager) SyncStartProcess() {
 	// Async config watcher
 	go m.watchConfig()
 
+	// Start renewer for vault creds if we were able to make a renewer
+	if m.secretRenewer != nil {
+		go m.secretRenewer.Start()
+		defer m.secretRenewer.Stop()
+	}
+
 	<-m.shutdown
 }
 
@@ -160,9 +166,22 @@ func (m *APIManager) initVault() {
 		if e != nil {
 			klog.Errorf("unable to retrieve kubernetes auth credentials: %v", e)
 		}
-		_, e = client.Auth().Login(context.Background(), k8s)
+		secret, e := client.Auth().Login(context.Background(), k8s)
 		if e != nil {
 			klog.Errorf("unable to login with kubernetes auth: %v", e)
+		}
+
+		renewer, e := client.NewLifetimeWatcher(&api.LifetimeWatcherInput{
+			Secret:        secret,
+			RenewBehavior: api.RenewBehaviorIgnoreErrors,
+			Increment:     3600,
+		})
+
+		if e == nil {
+			klog.V(3).Info("created renewer for automatically renewing client credentials")
+			m.secretRenewer = renewer
+		} else {
+			klog.Errorf("unable to create renewer for k8s auth: %s", e)
 		}
 	} else {
 		klog.Info("found VAULT_TOKEN, using that for vault auth")

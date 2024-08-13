@@ -17,18 +17,19 @@ import (
 // routines of subsystems that perform actual business logic.
 func New(opts *APIManagerOpts) *APIManager {
 	m := &APIManager{
-		count:     0,
-		opts:      opts,
-		systems:   make(map[string]Subsystem),
-		shutdown:  make(chan uint8),
-		config:    viper.New(),
-		secrets:   viper.New(),
-		registry:  prometheus.NewRegistry(),
-		vault:     nil,
-		router:    router.New(),
-		spec:      nil, // Start with null, the spec should be generated on Initialize().
-		server:    nil, // Start with null, the server should be started on Initialize().
-		sigHandle: make(chan os.Signal, 5),
+		count:         0,
+		opts:          opts,
+		systems:       make(map[string]Subsystem),
+		shutdown:      make(chan uint8),
+		config:        viper.New(),
+		secrets:       viper.New(),
+		registry:      prometheus.NewRegistry(),
+		vault:         nil,
+		secretRenewer: nil,
+		router:        router.New(),
+		spec:          nil, // Start with null, the spec should be generated on Initialize().
+		server:        nil, // Start with null, the server should be started on Initialize().
+		sigHandle:     make(chan os.Signal, 5),
 	}
 
 	if mgr == nil {
