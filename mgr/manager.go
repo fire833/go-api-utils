@@ -140,17 +140,40 @@ func (m *APIManager) initVault() {
 		conf := api.DefaultConfig()
 
 		conf.Address = m.config.GetString("vaultAddress")
-		conf.ConfigureTLS(&api.TLSConfig{
-			Insecure: m.config.GetBool("vaultSslInsecure"),
-		})
+
+		insecure := m.config.GetBool("vaultSslInsecure")
+
+		if insecure {
+			conf.ConfigureTLS(&api.TLSConfig{
+				Insecure: true,
+			})
+		} else {
+			conf.ConfigureTLS(&api.TLSConfig{
+				CAPath:        m.config.GetString("vaultCAPath"),
+				TLSServerName: m.config.GetString("vaultSNIName"),
+				Insecure:      false,
+			})
+		}
 
 		client, _ = api.NewClient(conf)
 	}
 
+	// Default to using vault token, otherwise try and login with k8s.
 	vaultToken := os.Getenv("VAULT_TOKEN")
 
 	if vaultToken == "" {
-		k8s, e := k8sauth.NewKubernetesAuth(m.config.GetString("vaultK8sRole"), k8sauth.WithMountPath(m.config.GetString("vaultK8sAuthMountPath")))
+		klog.Infof("no VAULT_TOKEN provided, attempting to login with k8s")
+
+		opts := []k8sauth.LoginOption{k8sauth.WithMountPath(m.config.GetString("vaultK8sAuthMountPath"))}
+
+		// Check if we have the serviceaccount token stored somewhere else, if so, add it to the options.
+		saToken := os.Getenv("VAULT_SA_TOKEN")
+		if saToken != "" {
+			klog.Infof("found VAULT_SA_TOKEN, using foor k8s auth process")
+			opts = append(opts, k8sauth.WithServiceAccountToken(saToken))
+		}
+
+		k8s, e := k8sauth.NewKubernetesAuth(m.config.GetString("vaultK8sRole"), opts...)
 		if e != nil {
 			klog.Errorf("unable to retrieve kubernetes auth credentials: %v", e)
 		}
@@ -159,6 +182,7 @@ func (m *APIManager) initVault() {
 			klog.Errorf("unable to login with kubernetes auth: %v", e)
 		}
 	} else {
+		klog.Infof("found VAULT_TOKEN, using that for vault auth")
 		client.SetToken(vaultToken)
 	}
 

@@ -43,10 +43,10 @@ func main() {
 		Registration: nil,
 	})
 
-	sec1 := mgr.NewSecretVaultValue("key1", "Get secret string from vault", "foobad", "devkv/test1")
-	sec2 := mgr.NewSecretVaultValue("key2", "Get secret string from vault", "foobad", "devkv/test1")
-	sec3 := mgr.NewSecretVaultValue("key1", "Get secret string from vault", "foobad", "devkv/test2")
-	sec4 := mgr.NewSecretVaultValue("key2", "Get secret string from vault", "foobad", "devkv/test2")
+	sec1 := mgr.NewSecretVaultValue("data", "Get secret string from vault", "foobad", "kttools/kv", "internal/ktnotify/api_key_hash")
+	sec2 := mgr.NewSecretVaultValue("data", "Get secret string from vault", "foobad", "kttools/kv", "oidc/jupyter/client_secret")
+	sec3 := mgr.NewSecretVaultValue("data", "Get secret string from vault", "foobad", "kttools/kv", "internal/github/webhooks/secret")
+	sec4 := mgr.NewSecretVaultValue("data", "Get secret string from vault", "foobad", "kttools/kv", "internal/gitea/webhooks/secret")
 
-	fmt.Printf("found: %s, %s, %v, %d\n", sec1.GetString(), sec2.GetString(), sec3.GetBool(), sec4.GetInt())
+	fmt.Printf("found: %s, %s, %s, %s\n", sec1.GetString(), sec2.GetString(), sec3.GetString(), sec4.GetString())
 }
