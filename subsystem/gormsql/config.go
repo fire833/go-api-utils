@@ -42,7 +42,7 @@ var (
 	gormSqlPort *manager.ConfigValue = manager.NewConfigValue(
 		"gormSqlPort",
 		"Specify the port of the remote SQL instance.",
-		uint16(3306),
+		uint16(26257),
 	)
 
 	gormSqlUsername *manager.SecretValue = manager.NewSecretValue(

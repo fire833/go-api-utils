@@ -26,23 +26,6 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// Sync start process should never return until process shutdown has been confirmed and all
-// subsystems have exited as gracefully as possible.
-func (m *APIManager) SyncStartProcess() {
-	go m.handleSignals() // start signal handler
-
-	if m.opts.EnableSysAPI {
-		go m.startSysAPI() // start sysAPI.
-	}
-
-	for name, sys := range m.systems {
-		klog.V(4).Infof("synchronously starting subsystem %s", name)
-		go sys.SyncStart()
-	}
-
-	<-m.shutdown
-}
-
 func (m *APIManager) initializeSubsystems(reg *SystemRegistrar) {
 	wg := new(sync.WaitGroup)
 	wg.Add(int(len(m.systems)))

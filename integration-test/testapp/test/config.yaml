@@ -1,2 +1,2 @@
-vaultAddress: http://localhost:8000
+vaultAddress: http://localhost:8004
 vaultSslInsecure: true
