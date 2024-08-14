@@ -20,6 +20,8 @@ package mgr
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -100,7 +102,38 @@ func (m *APIManager) SyncStartProcess() {
 		defer m.secretRenewer.Stop()
 	}
 
-	<-m.shutdown
+	for {
+		select {
+		case <-m.shutdown:
+			return
+		case done := <-m.secretRenewer.DoneCh():
+			klog.Errorf("received error for vault credential renewals: %s", done)
+		case renew := <-m.secretRenewer.RenewCh():
+			klog.Infof("successfully renewed vault credentials at %s for %d seconds", renew.RenewedAt, renew.Secret.LeaseDuration)
+		}
+	}
+}
+
+func (m *APIManager) GetVaultDbCreds() (*api.Secret, *api.LifetimeWatcher, error) {
+	if m.vault != nil {
+		secret, e := m.vault.Logical().Read(fmt.Sprintf("%s/creds/%s", m.config.GetString("vaultDbMountPath"), m.config.GetString("vaultDbRole")))
+		if e != nil {
+			return nil, nil, e
+		}
+
+		watcher, e := m.vault.NewLifetimeWatcher(&api.LifetimeWatcherInput{
+			Secret:        secret,
+			RenewBehavior: api.RenewBehaviorIgnoreErrors,
+			Increment:     7 * 24 * 60 * 60,
+		})
+		if e != nil {
+			return nil, nil, e
+		}
+
+		return secret, watcher, nil
+	} else {
+		return nil, nil, errors.New("vault not initialized, cannot retrieve credentials")
+	}
 }
 
 // loads in configuration/secrets to override default values with the given application.
@@ -184,7 +217,7 @@ func (m *APIManager) initVault() {
 			klog.Errorf("unable to create renewer for k8s auth: %s", e)
 		}
 	} else {
-		klog.Info("found VAULT_TOKEN, using that for vault auth")
+		klog.Info("found VAULT_TOKEN, using for vault auth")
 		client.SetToken(vaultToken)
 	}
 

@@ -19,14 +19,19 @@
 package gormsql
 
 import (
+	"errors"
+	"fmt"
+	"os"
 	"sync"
 
 	manager "github.com/fire833/go-api-utils/mgr"
+	"github.com/hashicorp/vault/api"
 	"github.com/prometheus/client_golang/prometheus"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"k8s.io/klog/v2"
 )
 
 const GormSQLSubsystemName = "gormsql"
@@ -38,12 +43,23 @@ type GormSQLManager struct {
 
 	totalTransactions prometheus.Counter
 
-	db *gorm.DB
+	credsRenewer *api.LifetimeWatcher
+	creds        *api.Secret
+	db           *gorm.DB
 }
 
 func New() *GormSQLManager {
 	return &GormSQLManager{
-		db: nil,
+		db:           nil,
+		credsRenewer: nil,
+	}
+}
+
+func NewWithCreds(creds *api.Secret, watcher *api.LifetimeWatcher) *GormSQLManager {
+	return &GormSQLManager{
+		db:           nil,
+		creds:        creds,
+		credsRenewer: watcher,
 	}
 }
 
@@ -61,10 +77,26 @@ func (g *GormSQLManager) Initialize(wg *sync.WaitGroup, reg *manager.SystemRegis
 		Logger: &gormLogger{},
 	}
 
+	var user, pass string
+	if g.creds != nil { // Try and read in credentials from the vault API secret.
+		u, okUser := g.creds.Data["username"]
+		p, okPass := g.creds.Data["password"]
+
+		if !okUser || !okPass {
+			return errors.New("gorm creds from vault couldn;t be retrieved, keys do not exist in secret")
+		}
+
+		user = u.(string)
+		pass = p.(string)
+	} else { // Otherwise, try from envvars
+		user = os.Getenv("GORM_SQL_USER")
+		pass = os.Getenv("GORM_SQL_PASS")
+	}
+
 	switch gormSQLBackend.GetString() {
-	case "postgres", "POSTGRES", "Postgres":
+	case "postgres", "POSTGRES", "Postgres", "pg", "cockroach":
 		{
-			if db, e := gorm.Open(postgres.Open(""), config); e == nil {
+			if db, e := gorm.Open(postgres.Open(g.createPostgresConnstring(user, pass)), config); e == nil {
 				g.db = db
 			} else {
 				return e
@@ -72,7 +104,7 @@ func (g *GormSQLManager) Initialize(wg *sync.WaitGroup, reg *manager.SystemRegis
 		}
 	case "mysql", "MYSQL", "MySQL":
 		{
-			if db, e := gorm.Open(mysql.Open(""), config); e == nil {
+			if db, e := gorm.Open(mysql.Open(g.createMysqlConnstring(user, pass)), config); e == nil {
 				g.db = db
 			} else {
 				return e
@@ -91,6 +123,17 @@ func (g *GormSQLManager) Initialize(wg *sync.WaitGroup, reg *manager.SystemRegis
 	return nil
 }
 
+func (g *GormSQLManager) createPostgresConnstring(user, pass string) string {
+	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s",
+		gormSqlHost.GetString(), user, pass, gormSqlDb.GetString(), gormSqlPort.GetUint16(),
+		gormTlsverifyLevel.GetString())
+}
+
+func (g *GormSQLManager) createMysqlConnstring(user, pass string) string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		user, pass, gormSqlHost.GetString(), gormSqlPort.GetUint16(), gormSqlDb.GetString())
+}
+
 func (g *GormSQLManager) Name() string { return GormSQLSubsystemName }
 
 func (g *GormSQLManager) SetGlobal() { SQL = g }
@@ -104,4 +147,22 @@ func (g *GormSQLManager) Reload(wg *sync.WaitGroup) {
 
 func (g *GormSQLManager) Shutdown(wg *sync.WaitGroup) {
 	defer wg.Done()
+}
+
+func (g *GormSQLManager) SyncStart() {
+	if g.credsRenewer != nil {
+		go g.credsRenewer.Start()
+		defer g.credsRenewer.Stop()
+
+		for {
+			select {
+			case done := <-g.credsRenewer.DoneCh():
+				klog.Errorf("received error for db credential renewals: %s", done)
+				return
+			case renew := <-g.credsRenewer.RenewCh():
+				// TODO: need to see if the credentials will actually change, or if they stay the same in which case we can exit here.
+				klog.Infof("successfully renewed db credentials at %s for %d seconds, restarting connections", renew.RenewedAt, renew.Secret.LeaseDuration)
+			}
+		}
+	}
 }

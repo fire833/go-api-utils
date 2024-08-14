@@ -39,22 +39,22 @@ var (
 		"localhost",
 	)
 
+	gormSqlDb *manager.ConfigValue = manager.NewConfigValue(
+		"gormSqlDb",
+		"Specify the database to connect to in the remote database.",
+		"default",
+	)
+
 	gormSqlPort *manager.ConfigValue = manager.NewConfigValue(
 		"gormSqlPort",
 		"Specify the port of the remote SQL instance.",
 		uint16(26257),
 	)
 
-	gormSqlUsername *manager.SecretValue = manager.NewSecretValue(
-		"gormSqlUsername",
-		"Specify the username to connect to the remote SQL instance.",
-		"",
-	)
-
-	gormSqlPassword *manager.SecretValue = manager.NewSecretValue(
-		"gormSqlPassword",
-		"Specify the password to connect to the remote SQL instance.",
-		"",
+	gormTlsverifyLevel *manager.ConfigValue = manager.NewConfigValue(
+		"gormTlsVerifyLevel",
+		"Specify the TLS validation level for the database connection.",
+		"verify-full",
 	)
 )
 
@@ -64,12 +64,11 @@ func (g *GormSQLManager) Configs() *[]*manager.ConfigValue {
 		gormSqliteFile,
 		gormSqlHost,
 		gormSqlPort,
+		gormSqlDb,
+		gormTlsverifyLevel,
 	}
 }
 
 func (g *GormSQLManager) Secrets() *[]*manager.SecretValue {
-	return &[]*manager.SecretValue{
-		gormSqlUsername,
-		gormSqlPassword,
-	}
+	return &[]*manager.SecretValue{}
 }
