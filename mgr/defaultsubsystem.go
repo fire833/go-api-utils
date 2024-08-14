@@ -19,8 +19,6 @@
 package mgr
 
 import (
-	"sync"
-
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -45,8 +43,14 @@ func (d *DefaultSubsystem) Initialize(reg *SystemRegistrar) error {
 	return nil
 }
 
+// NOP PreInit
+func (d *DefaultSubsystem) PreInit() {}
+
 // NOP SyncStart
 func (d *DefaultSubsystem) SyncStart() {}
+
+// NOP PostInit
+func (d *DefaultSubsystem) PostInit() {}
 
 func (d *DefaultSubsystem) Configs() *[]*ConfigValue {
 	return &[]*ConfigValue{}
@@ -57,12 +61,11 @@ func (d *DefaultSubsystem) Secrets() *[]*SecretValue {
 }
 
 // NOP to reload the subsystem
-func (d *DefaultSubsystem) Reload(wg *sync.WaitGroup) { wg.Done() }
+func (d *DefaultSubsystem) Reload() {}
 
 // NOP to shutdown the subsystem
-func (d *DefaultSubsystem) Shutdown(wg *sync.WaitGroup) {
+func (d *DefaultSubsystem) Shutdown() {
 	d.IsShutdown = true
-	wg.Done()
 }
 
 // Return nothing since this subsystem does nothing, but you should be able to fill this out at runtime

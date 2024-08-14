@@ -188,9 +188,7 @@ func (o *OTELManager) Initialize(reg manager.AppRegistration) error {
 }
 
 // Free all resources from the exporter and shutdown.
-func (o *OTELManager) Shutdown(wg *sync.WaitGroup) {
-	defer wg.Done()
-
+func (o *OTELManager) Shutdown() {
 	klog.V(4).Infoln("otel: shutting down tracer")
 	if e := o.tracer.Shutdown(context.Background()); e != nil {
 		klog.Errorf("unable to gracefully shutdown otel tracer subsystem: %v", e)

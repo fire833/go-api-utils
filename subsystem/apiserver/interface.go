@@ -2,7 +2,6 @@ package apiserver
 
 import (
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/fasthttp/router"
@@ -136,10 +135,7 @@ func (s *APIServer) SyncStart() {
 	}
 }
 
-func (s *APIServer) Reload(wg *sync.WaitGroup) { wg.Done() }
-
-func (s *APIServer) Shutdown(wg *sync.WaitGroup) {
-	defer wg.Done()
+func (s *APIServer) Shutdown() {
 	if e := s.server.Shutdown(); e != nil {
 		klog.Errorf("unable to gracefully shutdown apiserver subsystem: %v", e)
 	}

@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"sync"
 
 	manager "github.com/fire833/go-api-utils/mgr"
 	"github.com/hashicorp/vault/api"
@@ -137,14 +136,6 @@ func (g *GormSQLManager) Name() string { return GormSQLSubsystemName }
 func (g *GormSQLManager) SetGlobal() { SQL = g }
 
 func (g *GormSQLManager) Collect(ch chan<- prometheus.Metric) {
-}
-
-func (g *GormSQLManager) Reload(wg *sync.WaitGroup) {
-	defer wg.Done()
-}
-
-func (g *GormSQLManager) Shutdown(wg *sync.WaitGroup) {
-	defer wg.Done()
 }
 
 func (g *GormSQLManager) SyncStart() {
