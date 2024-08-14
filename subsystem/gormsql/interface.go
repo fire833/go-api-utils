@@ -63,9 +63,7 @@ func NewWithCreds(creds *api.Secret, watcher *api.LifetimeWatcher) *GormSQLManag
 	}
 }
 
-func (g *GormSQLManager) Initialize(wg *sync.WaitGroup, reg *manager.SystemRegistrar) error {
-	defer wg.Done()
-
+func (g *GormSQLManager) Initialize(reg *manager.SystemRegistrar) error {
 	g.totalTransactions = prometheus.NewCounter(prometheus.CounterOpts{
 		Namespace: reg.AppName,
 		Subsystem: GormSQLSubsystemName,

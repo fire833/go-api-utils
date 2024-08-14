@@ -65,8 +65,7 @@ type OTELManager struct {
 
 func (o *OTELManager) Name() string { return OTelManagerSubsystem }
 
-func (o *OTELManager) Initialize(wg *sync.WaitGroup, reg manager.AppRegistration) error {
-	defer wg.Done()
+func (o *OTELManager) Initialize(reg manager.AppRegistration) error {
 	o.m.Lock()
 	defer o.m.Unlock()
 

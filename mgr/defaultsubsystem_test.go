@@ -20,7 +20,6 @@ package mgr
 
 import (
 	"reflect"
-	"sync"
 	"testing"
 )
 
@@ -45,18 +44,13 @@ func TestDefaultSubsystem_Name(t *testing.T) {
 }
 
 func TestDefaultSubsystem_Initialize(t *testing.T) {
-	wg1 := new(sync.WaitGroup)
-	wg1.Add(1)
-
 	tests := []struct {
 		name    string
-		wg      *sync.WaitGroup
 		reg     *SystemRegistrar
 		wantErr bool
 	}{
 		{
 			name:    "1",
-			wg:      wg1,
 			wantErr: false,
 			reg:     nil,
 		},
@@ -64,7 +58,7 @@ func TestDefaultSubsystem_Initialize(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			d := &DefaultSubsystem{}
-			if err := d.Initialize(tt.wg, tt.reg); (err != nil) != tt.wantErr {
+			if err := d.Initialize(tt.reg); (err != nil) != tt.wantErr {
 				t.Errorf("DefaultSubsystem.Initialize() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

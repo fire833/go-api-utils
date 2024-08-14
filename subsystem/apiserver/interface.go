@@ -54,9 +54,7 @@ func New() *APIServer {
 
 func (s *APIServer) Name() string { return "api" }
 
-func (s *APIServer) Initialize(wg *sync.WaitGroup, reg *manager.SystemRegistrar) error {
-	defer wg.Done()
-
+func (s *APIServer) Initialize(reg *manager.SystemRegistrar) error {
 	s.servername = reg.AppName
 
 	s.router = router.New()

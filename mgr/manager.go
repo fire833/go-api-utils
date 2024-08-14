@@ -100,18 +100,20 @@ func (m *APIManager) SyncStartProcess() {
 	if m.secretRenewer != nil {
 		go m.secretRenewer.Start()
 		defer m.secretRenewer.Stop()
-	}
 
-	for {
-		select {
-		case <-m.shutdown:
-			return
-		case done := <-m.secretRenewer.DoneCh():
-			klog.Errorf("received error for vault credential renewals: %s", done)
-		case renew := <-m.secretRenewer.RenewCh():
-			klog.Infof("successfully renewed vault credentials at %s for %d seconds", renew.RenewedAt, renew.Secret.LeaseDuration)
+		for {
+			select {
+			case <-m.shutdown:
+				return
+			case done := <-m.secretRenewer.DoneCh():
+				klog.Errorf("received error for vault credential renewals: %s", done)
+			case renew := <-m.secretRenewer.RenewCh():
+				klog.Infof("successfully renewed vault credentials at %s for %d seconds", renew.RenewedAt, renew.Secret.LeaseDuration)
+			}
 		}
 	}
+
+	<-m.shutdown
 }
 
 func (m *APIManager) GetVaultDbCreds() (*api.Secret, *api.LifetimeWatcher, error) {

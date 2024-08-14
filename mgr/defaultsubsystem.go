@@ -40,8 +40,7 @@ func (d *DefaultSubsystem) Name() string { return "default" }
 
 func (d *DefaultSubsystem) SetGlobal() {}
 
-func (d *DefaultSubsystem) Initialize(wg *sync.WaitGroup, reg *SystemRegistrar) error {
-	defer wg.Done()
+func (d *DefaultSubsystem) Initialize(reg *SystemRegistrar) error {
 	d.IsInitialized = true
 	return nil
 }
