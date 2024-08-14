@@ -124,7 +124,7 @@ func (m *APIManager) GetVaultDbCreds() (*api.Secret, *api.LifetimeWatcher, error
 		watcher, e := m.vault.NewLifetimeWatcher(&api.LifetimeWatcherInput{
 			Secret:        secret,
 			RenewBehavior: api.RenewBehaviorIgnoreErrors,
-			Increment:     7 * 24 * 60 * 60,
+			Increment:     3600, // have them last an hour so they disappear quickly once the process dies.
 		})
 		if e != nil {
 			return nil, nil, e
@@ -207,7 +207,7 @@ func (m *APIManager) initVault() {
 		renewer, e := client.NewLifetimeWatcher(&api.LifetimeWatcherInput{
 			Secret:        secret,
 			RenewBehavior: api.RenewBehaviorIgnoreErrors,
-			Increment:     3600,
+			Increment:     3600, // have them last an hour so they disappear quickly once the process dies.
 		})
 
 		if e == nil {

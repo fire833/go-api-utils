@@ -160,7 +160,6 @@ func (g *GormSQLManager) SyncStart() {
 				klog.Errorf("received error for db credential renewals: %s", done)
 				return
 			case renew := <-g.credsRenewer.RenewCh():
-				// TODO: need to see if the credentials will actually change, or if they stay the same in which case we can exit here.
 				klog.Infof("successfully renewed db credentials at %s for %d seconds, restarting connections", renew.RenewedAt, renew.Secret.LeaseDuration)
 			}
 		}
