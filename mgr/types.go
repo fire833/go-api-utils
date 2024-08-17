@@ -61,9 +61,6 @@ type APIManager struct {
 
 	registrar *SystemRegistrar
 
-	// Count is the current count of subsystems that are registered with the manager.
-	// Should not be edited after init.
-	count uint
 	// Map of all subsystem names mapped to their backing implementations.
 	systems map[string]Subsystem
 

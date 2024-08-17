@@ -30,18 +30,21 @@ func (m *APIManager) initializeSubsystems(reg *SystemRegistrar) {
 	wg := new(sync.WaitGroup)
 	wg.Add(int(len(m.systems)))
 
+	// Make a channel to asynchrnously collect if any subsystems fail,
+	// in which case we want to then close out all subsystems and exit the process.
+	errChan := make(chan bool, len(m.systems))
+
 	for name, sys := range m.systems {
 		klog.V(3).Infof("initializing subsystem %s", name)
-		go func(s Subsystem, wg *sync.WaitGroup) {
+		go func(s Subsystem, wg *sync.WaitGroup, errChan chan<- bool) {
 			defer wg.Done()
+			defer func() {
+				if r := recover(); r != nil {
+					klog.Errorf("subsystem %s panicked whilst initializing: %v", s.Name(), r)
+				}
+			}()
 
 			for i := 1; i <= 3; i++ {
-				defer func() {
-					if r := recover(); r != nil {
-						klog.Errorf("subsystem %s panicked whilst initializing: %v", s.Name(), r)
-					}
-				}()
-
 				if e := s.Initialize(reg); e != nil {
 					klog.Errorf("unable to initialize subsystem %s (error: %s) %d times. Waiting 10 seconds to retry", s.Name(), e.Error(), i)
 					time.Sleep(time.Second * 10) // Wait for 10 seconds to try and reinitialize
@@ -51,26 +54,32 @@ func (m *APIManager) initializeSubsystems(reg *SystemRegistrar) {
 				}
 			}
 
-			klog.Errorf("3 retries attempted to initialize subsystem %s, aborting process startup", s.Name())
-
-			m.shutdownSubsystems()
-
-			os.Exit(1) // TODO invoke a more graceful shutdown process for subsystems that are already initialized.
-		}(sys, wg)
+			klog.Errorf("3 retries attempted to initialize subsystem %s, all failed", s.Name())
+			errChan <- true
+		}(sys, wg, errChan)
 	}
 
+	// Wait for all subsystems to complete, then evauate if any
+	// failed by checking the channel for any booleans.
 	wg.Wait()
+
+	// If we get more than 1 error, then we wish to shutdown the process.
+	if len(errChan) > 0 {
+		m.shutdownSubsystems()
+		os.Exit(len(errChan)) // Kind of clever maybe, return code is number of subsystems that failed.
+	}
 }
 
 func (m *APIManager) reloadSubsystems() {
-	klog.V(4).Infof("reload signal received, forwarding to %d subsystems", m.count)
+	klog.V(4).Infof("reload signal received, forwarding to %d subsystems", len(m.systems))
 
 	wg := new(sync.WaitGroup)
-	wg.Add(int(m.count))
+	wg.Add(len(m.systems))
 
 	for name, sys := range m.systems {
 		klog.V(5).Infof("sending reload update for subsystem %s", name)
 		go func(sys Subsystem, wg *sync.WaitGroup) {
+			defer wg.Done()
 			defer func() {
 				if r := recover(); r != nil {
 					klog.Errorf("subsystem %s panicked whilst reloading: %v", sys.Name(), r)
@@ -78,7 +87,6 @@ func (m *APIManager) reloadSubsystems() {
 			}()
 
 			sys.Reload()
-			wg.Done()
 		}(sys, wg)
 	}
 
@@ -87,14 +95,15 @@ func (m *APIManager) reloadSubsystems() {
 }
 
 func (m *APIManager) shutdownSubsystems() {
-	klog.V(4).Infof("shutdown signal received, forwarding to %d subsystems", m.count)
+	klog.V(4).Infof("shutdown signal received, forwarding to %d subsystems", len(m.systems))
 
 	wg := new(sync.WaitGroup)
-	wg.Add(int(m.count))
+	wg.Add(len(m.systems))
 
 	for name, sys := range m.systems {
 		klog.V(5).Infof("sending shutdown update for subsystem %s", name)
 		go func(sys Subsystem, wg *sync.WaitGroup) {
+			defer wg.Done()
 			defer func() {
 				if r := recover(); r != nil {
 					klog.Errorf("subsystem %s panicked whilst shutting down: %v", sys.Name(), r)
@@ -102,7 +111,6 @@ func (m *APIManager) shutdownSubsystems() {
 			}()
 
 			sys.Shutdown()
-			wg.Done()
 		}(sys, wg)
 	}
 

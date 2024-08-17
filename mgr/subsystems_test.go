@@ -75,7 +75,6 @@ func (m *mockSubsystem) Initialize(reg *SystemRegistrar) error {
 // that should never return), wrap that method here and it will be held open by the manager
 // as long as the process is alive.
 func (m *mockSubsystem) SyncStart() {
-	return
 }
 
 // If the configuration is found to be changed, the manager will call this callback
@@ -85,7 +84,6 @@ func (m *mockSubsystem) SyncStart() {
 func (m *mockSubsystem) Reload() {
 	time.Sleep(time.Second * time.Duration(m.reloadDelay))
 	klog.Infof("reloaded subsystem %s", m.name)
-	return
 }
 
 // If a kill signal is sent to the process, the manager will inform all subsystems of shutdown
@@ -120,20 +118,8 @@ func newMockSubsystem(name string, initDelay, reloadDelay, shutdownDelay float64
 	}
 }
 
-func mockManager() *APIManager {
-	return &APIManager{
-		count:     0,
-		systems:   make(map[string]Subsystem),
-		shutdown:  make(chan uint8),
-		config:    viper.New(),
-		secrets:   viper.New(),
-		sigHandle: make(chan os.Signal),
-	}
-}
-
 func TestAPIManager_initializeSubsystems(t *testing.T) {
 	type fields struct {
-		count     uint
 		systems   map[string]Subsystem
 		config    *viper.Viper
 		secrets   *viper.Viper
@@ -150,7 +136,6 @@ func TestAPIManager_initializeSubsystems(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &APIManager{
-				count:     tt.fields.count,
 				systems:   tt.fields.systems,
 				config:    tt.fields.config,
 				secrets:   tt.fields.secrets,
@@ -164,7 +149,6 @@ func TestAPIManager_initializeSubsystems(t *testing.T) {
 
 func TestAPIManager_reloadSubsystems(t *testing.T) {
 	type fields struct {
-		count     uint
 		systems   map[string]Subsystem
 		config    *viper.Viper
 		secrets   *viper.Viper
@@ -180,7 +164,6 @@ func TestAPIManager_reloadSubsystems(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &APIManager{
-				count:     tt.fields.count,
 				systems:   tt.fields.systems,
 				config:    tt.fields.config,
 				secrets:   tt.fields.secrets,
@@ -194,7 +177,6 @@ func TestAPIManager_reloadSubsystems(t *testing.T) {
 
 func TestAPIManager_shutdownSubsystems(t *testing.T) {
 	type fields struct {
-		count     uint
 		systems   map[string]Subsystem
 		config    *viper.Viper
 		secrets   *viper.Viper
@@ -210,7 +192,6 @@ func TestAPIManager_shutdownSubsystems(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &APIManager{
-				count:     tt.fields.count,
 				systems:   tt.fields.systems,
 				config:    tt.fields.config,
 				secrets:   tt.fields.secrets,

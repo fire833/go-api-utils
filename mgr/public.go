@@ -35,7 +35,6 @@ import (
 // routines of subsystems that perform actual business logic.
 func New(opts *APIManagerOpts) *APIManager {
 	m := &APIManager{
-		count:         0,
 		opts:          opts,
 		systems:       make(map[string]Subsystem),
 		shutdown:      make(chan uint8),
