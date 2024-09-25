@@ -24,48 +24,12 @@ import (
 )
 
 var (
-	subsystemStatusSchema *spec.Schema = &spec.Schema{
-		SchemaProps: spec.SchemaProps{
-			Title:       "SubsystemStatus",
-			Description: "Serialized object describing the status and additional metadata about a particular subsystem.",
-			Type:        []string{"object"},
-			Format:      "",
-			Properties: spec.SchemaProperties{
-				"name": spec.Schema{
-					SchemaProps: spec.SchemaProps{
-						Description: "The name of this subsystem from the source code.",
-						Title:       "name",
-						Type:        []string{"string"},
-						Format:      "",
-					},
-				},
-				"isInitialized": spec.Schema{
-					SchemaProps: spec.SchemaProps{
-						Description: "Boolean value of whether this subsystem is initialized.",
-						Title:       "isInitialized",
-						Type:        []string{"boolean"},
-						Format:      "",
-					},
-				},
-				"isShutdown": spec.Schema{
-					SchemaProps: spec.SchemaProps{
-						Description: "Boolean value of whether this subsystem is shutdown.",
-						Title:       "isShutdown",
-						Type:        []string{"boolean"},
-						Format:      "",
-					},
-				},
-				"meta": spec.Schema{
-					SchemaProps: spec.SchemaProps{
-						Description: "Arbitrary metadata object emitted by this subsystem.",
-						Title:       "meta",
-						Type:        []string{"object"},
-						Format:      "",
-					},
-				},
-			},
-		},
-	}
+	subsystemStatusSchema *spec.Schema = serialization.NewSchema("SubsystemStatus", "Serialized object describing the status and additional metadata about a particular subsystem.", []spec.Schema{
+		serialization.NewSchemaStringProperty("name", "The name of this subsystem from the source code."),
+		serialization.NewSchemaBooleanProperty("isInitialized", "Boolean value of whether this subsystem is initialized."),
+		serialization.NewSchemaBooleanProperty("isShutdown", "Boolean value of whether this subsystem is shutdown."),
+		serialization.NewSchemaObjectProperty("meta", "Arbitrary metadata object emitted by this subsystem."),
+	})
 
 	buildInfoSchema *spec.Schema = &spec.Schema{
 		SwaggerSchemaProps: spec.SwaggerSchemaProps{
