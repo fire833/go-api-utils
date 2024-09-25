@@ -18,7 +18,10 @@
 
 package mgr
 
-import "github.com/go-openapi/spec"
+import (
+	"github.com/fire833/go-api-utils/serialization"
+	"github.com/go-openapi/spec"
+)
 
 var (
 	subsystemStatusSchema *spec.Schema = &spec.Schema{
@@ -124,81 +127,16 @@ var (
 		},
 	}
 
-	configValueType *spec.Schema = &spec.Schema{
-		SchemaProps: spec.SchemaProps{
-			Title:  "ConfigValueType",
-			Type:   []string{"string"},
-			Format: "",
-			Enum:   []interface{}{"String", "StringSlice", "Bool", "Int", "IntSlice", "Uint", "Uint16", "Uint32", "Uint64", "Float64", "Time"},
-		},
-	}
-
-	configKeySchema *spec.Schema = &spec.Schema{
-		SchemaProps: spec.SchemaProps{
-			Title:       "ConfigKey",
-			Description: "Serialized object describing the value of a config/secret key/value within the current process.",
-			Type:        []string{"object"},
-			Format:      "",
-			Properties: spec.SchemaProperties{
-				"value": spec.Schema{
-					SchemaProps: spec.SchemaProps{
-						Title:       "value",
-						Description: "The current value of that config key in memory.",
-						Type:        []string{"object"},
-						Format:      "",
-					},
-				},
-				"meta": spec.Schema{
-					SchemaProps: spec.SchemaProps{
-						Title:       "meta",
-						Description: "Metadata associated with this config key.",
-						Type:        []string{"object"},
-						Properties: spec.SchemaProperties{
-							"name": spec.Schema{
-								SchemaProps: spec.SchemaProps{
-									Title:       "name",
-									Description: "Specify the actual key name for this property. This can be something like 'serverConcurrency', 'sqlDbUser', 'sqlDbPass', etc.",
-									Type:        []string{"string"},
-									Format:      "",
-								},
-							},
-							"description": spec.Schema{
-								SchemaProps: spec.SchemaProps{
-									Title:       "description",
-									Description: "Description of this key/value pair, what its used for, and any edge case information about it.",
-									Type:        []string{"string"},
-									Format:      "",
-								},
-							},
-							"typeOf": spec.Schema{
-								SchemaProps: spec.SchemaProps{
-									Title:       "description",
-									Description: "Description of this key/value pair, what its used for, and any edge case information about it.",
-									Type:        []string{"object"},
-									Format:      "",
-									Ref:         spec.MustCreateRef("#/definitions/ConfigValueType"),
-								},
-							},
-							"defaultVal": spec.Schema{
-								SchemaProps: spec.SchemaProps{
-									Title:       "defaultVal",
-									Description: "Default value for this config key.",
-									Type:        []string{"object"},
-									Format:      "",
-								},
-							},
-							"isSecret": spec.Schema{
-								SchemaProps: spec.SchemaProps{
-									Title:       "isSecret",
-									Description: "Whether or not this configkey value is to be regarded as a secret.",
-									Type:        []string{"boolean"},
-									Format:      "",
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
+	configKeySchema *spec.Schema = serialization.NewSchema("ConfigKey", "Serialized object describing the value of a config/secret key/value within the current process.", []spec.Schema{
+		serialization.NewSchemaObjectProperty("value", "The current value of that config key in memory."),
+		// Meta sub-object
+		*serialization.NewSchema("meta", "Metadata associated with this config key.", []spec.Schema{
+			serialization.NewSchemaStringProperty("name", "Specify the actual key name for this property. This can be something like 'serverConcurrency', 'sqlDbUser', 'sqlDbPass', etc."),
+			serialization.NewSchemaStringProperty("description", "Description of this key/value pair, what its used for, and any edge case information about it."),
+			serialization.NewSchemaEnumProperty("typeOf", "The type of this value", "string", "",
+				[]interface{}{"String", "StringSlice", "Bool", "Int", "IntSlice", "Uint", "Uint16", "Uint32", "Uint64", "Float64", "Time"}),
+			serialization.NewSchemaObjectProperty("defaultVal", "Default value for this config key."),
+			serialization.NewSchemaBooleanProperty("isSecret", "Whether or not this configkey value is to be regarded as a secret."),
+		}),
+	})
 )

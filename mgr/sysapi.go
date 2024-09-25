@@ -228,7 +228,6 @@ func (m *APIManager) initSysAPI() {
 				"OKResponse":           *serialization.OKResponseSchema,
 				"GenericErrorResponse": *serialization.GenericErrorResponseSchema,
 				"ConfigKeyValue":       *configKeySchema,
-				"ConfigValueType":      *configValueType,
 			},
 		},
 	}
