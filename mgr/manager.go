@@ -76,6 +76,9 @@ func (m *APIManager) Initialize(registrar *SystemRegistrar) {
 	m.preInit()
 	m.initializeSubsystems(registrar)
 	m.postInit()
+
+	// register collectors with the registry
+	registrar.Registration.RegisterCollectors(m.registry)
 }
 
 // Sync start process should never return until process shutdown has been confirmed and all
