@@ -36,7 +36,7 @@ import (
 // provided registrar.
 func (m *APIManager) Initialize(registrar *SystemRegistrar) {
 	if registrar == nil {
-		klog.Error("")
+		klog.Error("nil registrar pointer provided to the process")
 		return
 	}
 
@@ -78,7 +78,10 @@ func (m *APIManager) Initialize(registrar *SystemRegistrar) {
 	m.postInit()
 
 	// register collectors with the registry
-	registrar.Registration.RegisterCollectors(m.registry)
+	if registrar.Registration != nil && m.registry != nil {
+		klog.V(5).Infof("registering collectors with manager registry")
+		registrar.Registration.RegisterCollectors(m.registry)
+	}
 }
 
 // Sync start process should never return until process shutdown has been confirmed and all

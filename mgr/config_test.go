@@ -19,23 +19,32 @@
 package mgr
 
 import (
-	"reflect"
+	"math"
 	"testing"
 )
 
-func TestConfigValue_Get(t *testing.T) {
-	tests := []struct {
-		name string
-		want interface{}
-	}{
-		// TODO: Add test cases.
+func TestConfigValues(t *testing.T) {
+	var u16 uint16
+	for u16 = 0; u16 < math.MaxUint16; u16++ {
+		var testUint16 *ConfigValue = NewConfigValue("foo", "bar", uint16(u16))
+		if testUint16.GetUint16() != u16 {
+			t.Errorf("test config value does not return correct value: %d", u16)
+		}
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &ConfigValue{}
-			if got := c.Get(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ConfigValue.Get() = %v, want %v", got, tt.want)
-			}
-		})
+
+	var u32 uint32
+	for u32 = 0; u32 < math.MaxUint32/2; u32 += 10000 {
+		var testUint16 *ConfigValue = NewConfigValue("foo", "bar", uint32(u32))
+		if testUint16.GetUint32() != u32 {
+			t.Errorf("test config value does not return correct value: %d", u32)
+		}
+	}
+
+	var u64 uint64
+	for u64 = 0; u64 < math.MaxUint64/2; u64 += 9999999999995 {
+		var testUint16 *ConfigValue = NewConfigValue("foo", "bar", uint64(u64))
+		if testUint16.GetUint64() != u64 {
+			t.Errorf("test config value does not return correct value: %d", u64)
+		}
 	}
 }

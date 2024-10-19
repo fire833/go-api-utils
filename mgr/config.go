@@ -250,6 +250,7 @@ func (s *SecretValue) GetFloat64() float64 {
 
 func mgrLGet(secret bool, key string, def interface{}) interface{} {
 	if mgr == nil {
+		klog.V(3).Infof("using default value for key %s: %v", key, def)
 		return def
 	}
 

@@ -33,8 +33,8 @@ func main() {
 	flag.Set("v", strconv.Itoa(10))
 
 	m := mgr.New(&mgr.APIManagerOpts{
-		EnableSysAPI: false,
-		EnableVault:  true,
+		EnableSysAPI: true,
+		EnableVault:  false,
 	})
 
 	m.Initialize(&mgr.SystemRegistrar{
@@ -49,4 +49,5 @@ func main() {
 	sec4 := mgr.NewSecretVaultValue("data", "Get secret string from vault", "foobad", "kttools/kv", "internal/gitea/webhooks/secret")
 
 	fmt.Printf("found: %s, %s, %s, %s\n", sec1.GetString(), sec2.GetString(), sec3.GetString(), sec4.GetString())
+	m.SyncStartProcess()
 }

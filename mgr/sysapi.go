@@ -20,8 +20,8 @@ package mgr
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/fire833/go-api-utils/serialization"
@@ -30,6 +30,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/fasthttpadaptor"
+	"k8s.io/klog/v2"
 )
 
 type ConfigInfo struct {
@@ -43,9 +44,15 @@ type SecretInfo struct {
 }
 
 var (
+	sysAPIListenAddress *ConfigValue = NewConfigValue(
+		"sysAPIListenAddress",
+		"Specify the listening address of sysAPI.",
+		"0.0.0.0",
+	)
+
 	sysAPIListenPort *ConfigValue = NewConfigValue(
 		"sysAPIListenPort",
-		"Specify the listening port of the sysAPI. Should be an unsigned integer between 1 and 65535, but should be above 1024 preferably to avoid needing CAP_SYS_ADMIN or root privileges for the app process.",
+		"Specify the listening port of sysAPI. Should be an unsigned integer between 1 and 65535, but should be above 1024 preferably to avoid needing CAP_SYS_ADMIN or root privileges for the app process.",
 		uint16(8081),
 	)
 
@@ -346,5 +353,7 @@ func (m *APIManager) initSysAPI() {
 }
 
 func (m *APIManager) startSysAPI() {
-	m.server.ListenAndServe(":" + strconv.Itoa(int(sysAPIListenPort.GetUint16())))
+	bind := fmt.Sprintf("%s:%d", sysAPIListenAddress.GetString(), sysAPIListenPort.GetUint16())
+	klog.V(5).Infof("starting sysAPI on %s", bind)
+	m.server.ListenAndServe(bind)
 }
