@@ -1,4 +1,4 @@
 vaultAddress: http://localhost:8004
 vaultSslInsecure: true
-sysAPIListenAddress: "0.0.0.0"
+sysAPIListenAddress: "127.0.0.1"
 sysAPIListenPort: 8081

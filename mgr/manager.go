@@ -61,6 +61,18 @@ func (m *APIManager) Initialize(registrar *SystemRegistrar) {
 		m.skeys = append(m.skeys, secrets...)
 	}
 
+	//
+	if m.opts.EnableSysAPI {
+		m.ckeys = append(m.ckeys, sysAPIListenAddress)
+		m.ckeys = append(m.ckeys, sysAPIListenPort)
+		m.ckeys = append(m.ckeys, sysAPIConcurrency)
+		m.ckeys = append(m.ckeys, sysAPIIdleTimeout)
+		m.ckeys = append(m.ckeys, sysAPIReadTimeout)
+		m.ckeys = append(m.ckeys, sysAPIWriteTimeout)
+		m.ckeys = append(m.ckeys, sysAPIWriteBufferSize)
+		m.ckeys = append(m.ckeys, sysAPIReadBufferSize)
+	}
+
 	// read in configuration and secrets before booting further, or at least attempt to.
 	m.initConfigs()
 
@@ -150,8 +162,18 @@ func (m *APIManager) initConfigs() {
 	m.config.AddConfigPath("test")
 	m.config.SetConfigName("config")
 
+	// Register default values into config map.
+	for _, key := range m.ckeys {
+		m.config.SetDefault(key.key, key.defaultVal)
+	}
+
 	if e := m.config.ReadInConfig(); e != nil {
 		klog.Errorf("ALERT: unable to read in configuration file! Relying on system defaults. Error: %v", e)
+	}
+
+	// Register defualt values into secrets map.
+	for _, key := range m.skeys {
+		m.secrets.SetDefault(key.key, key.defaultVal)
 	}
 
 	m.secrets.AddConfigPath("/etc/" + m.registrar.AppName + "/secrets")
