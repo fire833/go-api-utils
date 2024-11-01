@@ -10,7 +10,7 @@ require (
 	github.com/go-openapi/spec v0.21.0
 	github.com/hashicorp/vault/api v1.14.0
 	github.com/hashicorp/vault/api/auth/kubernetes v0.7.0
-	github.com/prometheus/client_golang v1.19.1
+	github.com/prometheus/client_golang v1.20.5
 	github.com/spf13/viper v1.19.0
 	github.com/valyala/fasthttp v1.55.0
 	go.opentelemetry.io/otel v1.28.0
