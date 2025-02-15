@@ -1,8 +1,6 @@
 module github.com/fire833/go-api-utils
 
-go 1.21
-
-toolchain go1.21.5
+go 1.24.0
 
 require (
 	github.com/BurntSushi/toml v1.4.0
