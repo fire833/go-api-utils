@@ -27,8 +27,11 @@ on:
     tags:
       - "*"
 
+permissions:
+  contents: read
+
 jobs:
   ci:
-    uses: fire833/cicd-templates/.github/workflows/golang_ci_v1.yaml@main
+    uses: fire833/cicd-templates/.github/workflows/golang_ci_v2.yaml@main
     with:
       CI_SKIP: /build/
