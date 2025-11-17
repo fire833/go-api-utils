@@ -114,9 +114,6 @@ func (m *APIManager) shutdownSubsystems() {
 				}
 			}()
 
-			if ok := m.registry.Unregister(sys); !ok {
-				klog.Infof("unable to unregister subsystem %s from registry", sys.Name())
-			}
 			sys.Shutdown()
 		}(sys, wg)
 	}
