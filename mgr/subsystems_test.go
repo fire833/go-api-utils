@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
 	"k8s.io/klog/v2"
 )
@@ -94,6 +95,12 @@ func (m *mockSubsystem) Shutdown() {
 	time.Sleep(time.Second * time.Duration(m.shutdownDelay))
 	klog.Infof("shutdown subsystem %s", m.name)
 	m.isDown = true
+}
+
+func (m *mockSubsystem) Collect(ch chan<- prometheus.Metric) {
+}
+
+func (m *mockSubsystem) Describe(ch chan<- *prometheus.Desc) {
 }
 
 // This callback can be invoked at any point in execution by the manager to determine the

@@ -49,9 +49,13 @@ func (m *APIManager) initializeSubsystems(reg *SystemRegistrar) {
 					klog.Errorf("unable to initialize subsystem %s (error: %s) %d times. Waiting 10 seconds to retry", s.Name(), e.Error(), i)
 					time.Sleep(time.Second * 10) // Wait for 10 seconds to try and reinitialize
 					continue
-				} else {
-					return
 				}
+
+				if e := m.registry.Register(s); e != nil {
+					klog.Errorf("unable to register subsystem %s with registry: %s", s.Name(), e)
+				}
+
+				return
 			}
 
 			klog.Errorf("3 retries attempted to initialize subsystem %s, all failed", s.Name())
@@ -110,6 +114,9 @@ func (m *APIManager) shutdownSubsystems() {
 				}
 			}()
 
+			if ok := m.registry.Unregister(sys); !ok {
+				klog.Infof("unable to unregister subsystem %s from registry", sys.Name())
+			}
 			sys.Shutdown()
 		}(sys, wg)
 	}

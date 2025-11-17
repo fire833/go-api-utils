@@ -28,7 +28,7 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func loadSimpleApp() *APIManager {
+func loadSimpleApp(sysAPI bool) *APIManager {
 	// Reset the manager to nil on every test
 	mgr = nil
 
@@ -43,14 +43,25 @@ func loadSimpleApp() *APIManager {
 		},
 	}
 
-	m := New(&APIManagerOpts{})
+	m := New(&APIManagerOpts{
+		EnableSysAPI: sysAPI,
+	})
 	m.Initialize(reg)
 	return m
 }
 
 func TestStartup(t *testing.T) {
 	t.Run("simpleStartStop", func(t *testing.T) {
-		m := loadSimpleApp()
+		m := loadSimpleApp(false)
+
+		go m.SyncStartProcess()
+
+		klog.Info("sending shutdown for process")
+		m.shutdownSubsystems()
+	})
+
+	t.Run("withSysAPI", func(t *testing.T) {
+		m := loadSimpleApp(true)
 
 		go m.SyncStartProcess()
 
@@ -59,7 +70,7 @@ func TestStartup(t *testing.T) {
 	})
 
 	t.Run("reload", func(t *testing.T) {
-		m := loadSimpleApp()
+		m := loadSimpleApp(false)
 
 		go m.SyncStartProcess()
 
