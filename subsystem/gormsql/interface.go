@@ -80,7 +80,7 @@ func (g *GormSQLManager) Initialize(reg *manager.SystemRegistrar) error {
 		p, okPass := g.creds.Data["password"]
 
 		if !okUser || !okPass {
-			return errors.New("gorm creds from vault couldn;t be retrieved, keys do not exist in secret")
+			return errors.New("gorm creds from vault couldn't be retrieved, keys do not exist in secret")
 		}
 
 		user = u.(string)
@@ -136,6 +136,7 @@ func (g *GormSQLManager) Name() string { return GormSQLSubsystemName }
 func (g *GormSQLManager) SetGlobal() { SQL = g }
 
 func (g *GormSQLManager) Collect(ch chan<- prometheus.Metric) {
+	ch <- g.totalTransactions
 }
 
 func (g *GormSQLManager) SyncStart() {
