@@ -16,21 +16,4 @@
 *	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package gormsql
-
-import (
-	"errors"
-
-	"gorm.io/gorm"
-)
-
-// transaction is a standard interface for callers to get a transaction, if available,
-// to the provided gorm backend DB.
-func Transaction(model any) (*gorm.DB, error) {
-	if SQL != nil && SQL.db != nil {
-		SQL.totalTransactions.Inc()
-		return SQL.db.Model(model), nil
-	} else {
-		return nil, errors.New("gormsql subsystem not enabled")
-	}
-}
+package elastic
