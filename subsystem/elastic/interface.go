@@ -36,7 +36,7 @@ var ELASTIC *ElasticManager
 type ElasticManager struct {
 	manager.DefaultSubsystem
 
-	client *elasticsearch.Client
+	TypedClient *elasticsearch.TypedClient
 
 	credsRenewer *api.LifetimeWatcher
 	creds        *api.Secret
@@ -47,7 +47,7 @@ type ElasticManager struct {
 
 func New() *ElasticManager {
 	return &ElasticManager{
-		client:        nil,
+		TypedClient:   nil,
 		isInitialized: false,
 		isShutdown:    false,
 	}
@@ -55,7 +55,7 @@ func New() *ElasticManager {
 
 func NewWithCreds(creds *api.Secret, watcher *api.LifetimeWatcher) *ElasticManager {
 	return &ElasticManager{
-		client:        nil,
+		TypedClient:   nil,
 		creds:         creds,
 		credsRenewer:  watcher,
 		isInitialized: false,
@@ -84,7 +84,7 @@ func (s *ElasticManager) Initialize(reg *manager.SystemRegistrar) error {
 		pass = os.Getenv("ELASTIC_PASS")
 	}
 
-	client, e := elasticsearch.NewClient(elasticsearch.Config{
+	client, e := elasticsearch.NewTypedClient(elasticsearch.Config{
 		Username: user,
 		Password: pass,
 		Logger:   &elastictransport.JSONLogger{},
@@ -93,7 +93,7 @@ func (s *ElasticManager) Initialize(reg *manager.SystemRegistrar) error {
 		return e
 	}
 
-	s.client = client
+	s.TypedClient = client
 
 	s.isInitialized = true
 	return nil
